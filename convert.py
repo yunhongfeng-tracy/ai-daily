@@ -14,128 +14,149 @@ CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f5f5f7;
     min-height: 100vh;
     padding: 40px 20px;
 }
 .container { max-width: 800px; margin: 0 auto; }
 .logo {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 .logo h1 {
-    font-size: 2.5rem;
-    color: white;
+    font-size: 2rem;
+    color: #1d1d1f;
+    font-weight: 700;
     margin-bottom: 8px;
+    letter-spacing: -0.5px;
 }
-.logo p { color: rgba(255,255,255,0.8); font-size: 1rem; }
+.logo p { color: #86868b; font-size: 1rem; }
 
 /* 归档列表 */
 .archive-list {
     background: white;
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     overflow: hidden;
 }
 .archive-item {
-    display: block;
-    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
     text-decoration: none;
     color: inherit;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
 }
 .archive-item:last-child { border-bottom: none; }
-.archive-item:hover { background: #f8f9ff; }
+.archive-item:hover { background: #fafafa; }
 .archive-date {
-    font-size: 0.85rem;
-    color: #667eea;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size: 0.8rem;
+    color: #86868b;
+    min-width: 90px;
 }
 .archive-title {
-    font-size: 1.1rem;
-    color: #333;
+    flex: 1;
+    font-size: 1rem;
+    color: #1d1d1f;
     font-weight: 500;
 }
 .archive-arrow {
-    float: right;
-    color: #667eea;
-    font-size: 1.2rem;
+    color: #86868b;
+    font-size: 1rem;
+    transition: transform 0.2s;
 }
+.archive-item:hover .archive-arrow { transform: translateX(3px); color: #1d1d1f; }
 footer {
     text-align: center;
     margin-top: 40px;
-    color: rgba(255,255,255,0.7);
-    font-size: 0.9rem;
+    color: #86868b;
+    font-size: 0.85rem;
 }
 
 /* 当日页面样式 */
 .day-page {
     background: white;
     border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     overflow: hidden;
 }
 .day-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1d1d1f;
     padding: 30px;
     color: white;
 }
-.day-header h1 { font-size: 1.8rem; margin-bottom: 5px; }
-.day-header .date { opacity: 0.8; }
+.day-header h1 { 
+    font-size: 1.6rem; 
+    margin-bottom: 6px; 
+    font-weight: 600;
+}
+.day-header .date { 
+    opacity: 0.6; 
+    font-size: 0.9rem;
+}
 .day-content { padding: 30px; }
 .section-title {
-    font-size: 1.2rem;
-    color: #667eea;
-    margin: 25px 0 15px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #667eea;
+    font-size: 1.1rem;
+    color: #1d1d1f;
+    margin: 28px 0 16px;
+    padding-bottom: 10px;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f0f0;
 }
 .card {
-    background: #f8f9ff;
+    background: #fafafa;
     border-radius: 12px;
     padding: 18px;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
+    border: 1px solid #f0f0f0;
 }
-.card h3 { font-size: 1rem; color: #333; margin-bottom: 8px; }
-.card .source { font-size: 0.8rem; color: #667eea; margin-bottom: 8px; }
-.card .source a { color: #667eea; text-decoration: none; }
-.card p { font-size: 0.9rem; color: #666; line-height: 1.6; margin-bottom: 10px; }
+.card h3 { font-size: 1rem; color: #1d1d1f; margin-bottom: 8px; font-weight: 600; }
+.card .source { font-size: 0.8rem; color: #86868b; margin-bottom: 8px; }
+.card .source a { color: #0066cc; text-decoration: none; }
+.card p { font-size: 0.9rem; color: #515154; line-height: 1.6; margin-bottom: 12px; }
 .card .read-more {
     display: inline-block;
     font-size: 0.85rem;
-    color: #667eea;
+    color: #0066cc;
     text-decoration: none;
     font-weight: 500;
 }
+.card .read-more:hover { text-decoration: underline; }
 .tool-card {
     display: flex;
     align-items: center;
-    background: #f8f9ff;
+    background: #fafafa;
     border-radius: 12px;
-    padding: 18px;
+    padding: 16px 18px;
     margin-bottom: 12px;
+    border: 1px solid #f0f0f0;
 }
 .tool-info { flex: 1; }
-.tool-name { font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 4px; }
-.tool-desc { font-size: 0.85rem; color: #666; }
+.tool-name { font-size: 1rem; font-weight: 600; color: #1d1d1f; margin-bottom: 3px; }
+.tool-desc { font-size: 0.85rem; color: #515154; }
 .tool-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1d1d1f;
     color: white;
     padding: 8px 16px;
     border-radius: 8px;
     text-decoration: none;
     font-size: 0.85rem;
+    font-weight: 500;
+    transition: background 0.2s;
 }
+.tool-link:hover { background: #424245; }
 .back-link {
-    display: inline-block;
-    margin-bottom: 20px;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #515154;
     text-decoration: none;
     font-size: 0.95rem;
+    transition: color 0.2s;
 }
-.back-link:hover { text-decoration: underline; }
+.back-link:hover { color: #1d1d1f; }
 </style>
 """
 
