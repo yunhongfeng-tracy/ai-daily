@@ -5,7 +5,10 @@ on:
     branches: [main]
     paths:
       - 'daily/*.md'
+      - 'daily/*.html'
       - 'index.md'
+      - 'index.html'
+      - 'convert.py'
   workflow_dispatch:
 
 permissions:
