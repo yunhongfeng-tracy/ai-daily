@@ -18,7 +18,7 @@ body {
     min-height: 100vh;
     padding: 40px 20px;
 }
-.container { max-width: 800px; margin: 0 auto; }
+.container { max-width: 1100px; margin: 0 auto; }
 .logo {
     text-align: center;
     margin-bottom: 30px;
@@ -80,25 +80,36 @@ footer {
     border-radius: 20px;
     box-shadow: 0 4px 30px rgba(0,0,0,0.04);
     overflow: hidden;
-    max-width: 680px;
+    max-width: 100%;
     margin: 0 auto;
 }
 .day-header {
     background: #1d1d1f;
-    padding: 48px 32px;
+    padding: 40px;
     color: white;
 }
-.day-header h1 { 
-    font-size: 2rem; 
-    margin-bottom: 8px; 
+.day-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
-.day-header .date { 
-    opacity: 0.6; 
+.day-header .date {
+    opacity: 0.6;
     font-size: 1rem;
 }
-.day-content { padding: 40px 32px; }
+.day-content { padding: 32px 40px; }
+
+/* 新闻网格布局 */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .news-grid { grid-template-columns: 1fr; }
+}
 .section-title {
     font-size: 1.4rem;
     color: #1d1d1f;
@@ -112,50 +123,60 @@ footer {
     background: #fff;
     border-radius: 16px;
     padding: 0;
-    margin-bottom: 32px;
     border: 1px solid #e8e8ed;
-    transition: box-shadow 0.2s ease;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
 }
 .card:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    border-color: transparent;
 }
 .card-content {
     padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
-.card h3 { 
-    font-size: 1.2rem; 
-    color: #1d1d1f; 
-    margin-bottom: 10px; 
+.card h3 {
+    font-size: 1.1rem;
+    color: #1d1d1f;
+    margin-bottom: 10px;
     font-weight: 600;
     letter-spacing: -0.2px;
+    line-height: 1.4;
 }
-.card .source { 
-    font-size: 0.85rem; 
-    color: #86868b; 
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.card .source {
+    font-size: 0.8rem;
+    color: #86868b;
+    margin-bottom: 12px;
 }
-.card .source a { 
-    color: #0066cc; 
-    text-decoration: none; 
+.card .source a {
+    color: #0066cc;
+    text-decoration: none;
 }
 .card .source a:hover { text-decoration: underline; }
-.card p { 
-    font-size: 1rem; 
-    color: #515154; 
-    line-height: 1.75; 
-    margin-bottom: 18px;
+.card p {
+    font-size: 0.95rem;
+    color: #515154;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .card .read-more {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #0066cc;
     text-decoration: none;
     font-weight: 500;
+    margin-top: auto;
 }
 .card .read-more:hover { text-decoration: underline; }
 
@@ -380,6 +401,7 @@ def generate_daily_pages():
         html_content = re.sub(r'^<p>日期:.*?</p>', '', html_content, flags=re.MULTILINE)
 
         # 处理新闻卡片
+        news_cards = []
         def replace_news(match):
             title = match.group(1)
             source_link = match.group(2)
@@ -388,8 +410,7 @@ def generate_daily_pages():
             summary = match.group(5)
             read_link = match.group(6)
 
-            return f'''
-<div class="card">
+            card = f'''<div class="card">
     <div class="card-content">
         <h3>{title}</h3>
         <div class="source"><a href="{source_link}">{source_name}</a> · {source_date}</div>
@@ -397,6 +418,8 @@ def generate_daily_pages():
         <a href="{read_link}" class="read-more" target="_blank">阅读原文 →</a>
     </div>
 </div>'''
+            news_cards.append(card)
+            return '<!--NEWS_PLACEHOLDER-->'
 
         # 转换新闻格式: <h3>标题</h3><p>来源: <a>...</a> · 日期</p><p>摘要</p><p><a>阅读原文</a></p>
         html_content = re.sub(
@@ -405,6 +428,12 @@ def generate_daily_pages():
             html_content,
             flags=re.DOTALL
         )
+
+        # 将新闻卡片包装在网格容器中
+        if news_cards:
+            news_grid = '<div class="news-grid">\n' + '\n'.join(news_cards) + '\n</div>'
+            html_content = html_content.replace('<!--NEWS_PLACEHOLDER-->', news_grid, 1)
+            html_content = html_content.replace('<!--NEWS_PLACEHOLDER-->', '')
 
         # 处理工具卡片 - 添加图标和颜色
         tool_cards = []
