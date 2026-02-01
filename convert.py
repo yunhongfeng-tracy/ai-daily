@@ -77,72 +77,142 @@ footer {
 /* 当日页面样式 */
 .day-page {
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.04);
     overflow: hidden;
+    max-width: 680px;
+    margin: 0 auto;
 }
 .day-header {
     background: #1d1d1f;
-    padding: 30px;
+    padding: 48px 32px;
     color: white;
 }
 .day-header h1 { 
-    font-size: 1.6rem; 
-    margin-bottom: 6px; 
-    font-weight: 600;
+    font-size: 2rem; 
+    margin-bottom: 8px; 
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 .day-header .date { 
     opacity: 0.6; 
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
-.day-content { padding: 30px; }
+.day-content { padding: 40px 32px; }
 .section-title {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     color: #1d1d1f;
-    margin: 28px 0 16px;
-    padding-bottom: 10px;
-    font-weight: 600;
-    border-bottom: 2px solid #f0f0f0;
+    margin: 40px 0 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
 }
+
+/* 新闻卡片 - Apple风格 */
 .card {
-    background: #fafafa;
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 14px;
-    border: 1px solid #f0f0f0;
+    background: #fff;
+    border-radius: 16px;
+    padding: 0;
+    margin-bottom: 32px;
+    border: 1px solid #e8e8ed;
+    transition: box-shadow 0.2s ease;
 }
-.card h3 { font-size: 1rem; color: #1d1d1f; margin-bottom: 8px; font-weight: 600; }
-.card .source { font-size: 0.8rem; color: #86868b; margin-bottom: 8px; }
-.card .source a { color: #0066cc; text-decoration: none; }
-.card p { font-size: 0.9rem; color: #515154; line-height: 1.6; margin-bottom: 12px; }
+.card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+.card-content {
+    padding: 24px;
+}
+.card h3 { 
+    font-size: 1.2rem; 
+    color: #1d1d1f; 
+    margin-bottom: 10px; 
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+.card .source { 
+    font-size: 0.85rem; 
+    color: #86868b; 
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.card .source a { 
+    color: #0066cc; 
+    text-decoration: none; 
+}
+.card .source a:hover { text-decoration: underline; }
+.card p { 
+    font-size: 1rem; 
+    color: #515154; 
+    line-height: 1.75; 
+    margin-bottom: 18px;
+}
 .card .read-more {
-    display: inline-block;
-    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
     color: #0066cc;
     text-decoration: none;
     font-weight: 500;
 }
 .card .read-more:hover { text-decoration: underline; }
+
+/* 工具卡片 - 更大卡片风格 */
 .tool-card {
+    display: block;
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    border: 1px solid #e8e8ed;
+    transition: all 0.2s ease;
+}
+.tool-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+.tool-header {
     display: flex;
     align-items: center;
-    background: #fafafa;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.tool-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
-    padding: 16px 18px;
-    margin-bottom: 12px;
-    border: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
 }
 .tool-info { flex: 1; }
-.tool-name { font-size: 1rem; font-weight: 600; color: #1d1d1f; margin-bottom: 3px; }
-.tool-desc { font-size: 0.85rem; color: #515154; }
+.tool-name { 
+    font-size: 1.15rem; 
+    font-weight: 600; 
+    color: #1d1d1f; 
+    margin-bottom: 3px;
+}
+.tool-desc { 
+    font-size: 0.95rem; 
+    color: #515154; 
+    line-height: 1.5;
+}
 .tool-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     background: #1d1d1f;
     color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 10px 20px;
+    border-radius: 20px;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 500;
+    margin-top: 16px;
     transition: background 0.2s;
 }
 .tool-link:hover { background: #424245; }
@@ -245,6 +315,23 @@ def generate_daily_pages():
     """生成每个日报页面"""
     files = get_daily_files()
     
+    # 工具图标配置
+    tool_icons = {
+        'v0': '🎨',
+        'cursor': '💻',
+        'perplexity': '🔍',
+        'langchain': '⛓️',
+        'hugging': '🤗',
+        'default': '🛠️'
+    }
+    
+    def get_tool_icon(name):
+        name_lower = name.lower()
+        for key, icon in tool_icons.items():
+            if key in name_lower:
+                return icon
+        return tool_icons['default']
+    
     for f in files:
         title, date, content = parse_daily_file(f'daily/{f}')
         
@@ -257,9 +344,37 @@ def generate_daily_pages():
         
         html_content = convert_markdown(content)
         
-        # 移除标题行（因为我们在header中显示）
+        # 移除标题行和日期行（因为我们在header中显示）
         html_content = re.sub(r'^<h1>.*?</h1>', '', html_content, flags=re.MULTILINE)
         html_content = re.sub(r'^<p>日期:.*?</p>', '', html_content, flags=re.MULTILINE)
+        html_content = re.sub(r'^<hr />', '', html_content, flags=re.MULTILINE)
+        
+        # 处理工具卡片 - 添加图标
+        def replace_tool(match):
+            tool_name = match.group(1) if match.group(1) else ''
+            tool_desc = match.group(2) if match.group(2) else ''
+            tool_link = match.group(3) if match.group(3) else '#'
+            icon = get_tool_icon(tool_name)
+            
+            return f'''
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon">{icon}</div>
+        <div class="tool-info">
+            <div class="tool-name">{tool_name}</div>
+            <div class="tool-desc">{tool_desc}</div>
+        </div>
+    </div>
+    <a href="{tool_link}" class="tool-link" target="_blank">访问 →</a>
+</div>'''
+        
+        # 转换工具推荐格式
+        html_content = re.sub(
+            r'<h3>(\d+\.\s*[^<]+)</h3>\s*<p>📝\s*([^<]+)</p>\s*<p>🔗\s*<a[^>]*href="([^"]*)"[^>]*>.*?</a></p>',
+            replace_tool,
+            html_content,
+            flags=re.MULTILINE
+        )
         
         html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
