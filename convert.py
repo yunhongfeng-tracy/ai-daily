@@ -275,9 +275,9 @@ def generate_index_html():
         
         items_html += f'''
 <a href="./daily/{f.replace('.md', '.html')}" class="archive-item">
-    <span class="archive-arrow">→</span>
     <div class="archive-date">{date_display}</div>
     <div class="archive-title">{title}</div>
+    <span class="archive-arrow">→</span>
 </a>'''
     
     html = f"""<!DOCTYPE html>
@@ -301,7 +301,7 @@ def generate_index_html():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:rgba(255,255,255,0.8);">GitHub</a>
+            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
         </footer>
     </div>
 </body>
@@ -343,19 +343,45 @@ def generate_daily_pages():
             date_display = date
         
         html_content = convert_markdown(content)
-        
+
         # 移除标题行和日期行（因为我们在header中显示）
         html_content = re.sub(r'^<h1>.*?</h1>', '', html_content, flags=re.MULTILINE)
         html_content = re.sub(r'^<p>日期:.*?</p>', '', html_content, flags=re.MULTILINE)
-        html_content = re.sub(r'^<hr />', '', html_content, flags=re.MULTILINE)
-        
+
+        # 处理新闻卡片
+        def replace_news(match):
+            title = match.group(1)
+            source_link = match.group(2)
+            source_name = match.group(3)
+            source_date = match.group(4)
+            summary = match.group(5)
+            read_link = match.group(6)
+
+            return f'''
+<div class="card">
+    <div class="card-content">
+        <h3>{title}</h3>
+        <div class="source"><a href="{source_link}">{source_name}</a> · {source_date}</div>
+        <p>{summary}</p>
+        <a href="{read_link}" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>'''
+
+        # 转换新闻格式: <h3>标题</h3><p>来源: <a>...</a> · 日期</p><p>摘要</p><p><a>阅读原文</a></p>
+        html_content = re.sub(
+            r'<h3>([^<]+)</h3>\s*<p>来源:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>\s*·\s*([^<]+)</p>\s*<p>([^<]+)</p>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
+            replace_news,
+            html_content,
+            flags=re.DOTALL
+        )
+
         # 处理工具卡片 - 添加图标
         def replace_tool(match):
             tool_name = match.group(1) if match.group(1) else ''
             tool_desc = match.group(2) if match.group(2) else ''
             tool_link = match.group(3) if match.group(3) else '#'
             icon = get_tool_icon(tool_name)
-            
+
             return f'''
 <div class="tool-card">
     <div class="tool-header">
@@ -367,14 +393,17 @@ def generate_daily_pages():
     </div>
     <a href="{tool_link}" class="tool-link" target="_blank">访问 →</a>
 </div>'''
-        
-        # 转换工具推荐格式
+
+        # 转换工具推荐格式: <h3>工具名</h3><p>📝 描述</p><p>🔗 <a>访问</a></p>
         html_content = re.sub(
-            r'<h3>(\d+\.\s*[^<]+)</h3>\s*<p>📝\s*([^<]+)</p>\s*<p>🔗\s*<a[^>]*href="([^"]*)"[^>]*>.*?</a></p>',
+            r'<h3>([^<]+)</h3>\s*<p>📝\s*([^<]+)</p>\s*<p>🔗\s*<a[^>]*href="([^"]*)"[^>]*>[^<]*</a></p>\s*(?:<hr\s*/?>)?',
             replace_tool,
             html_content,
-            flags=re.MULTILINE
+            flags=re.DOTALL
         )
+
+        # 清理多余的 <hr> 标签
+        html_content = re.sub(r'<hr\s*/?>', '', html_content)
         
         html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -399,7 +428,7 @@ def generate_daily_pages():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:rgba(255,255,255,0.8);">GitHub</a>
+            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
         </footer>
     </div>
 </body>
