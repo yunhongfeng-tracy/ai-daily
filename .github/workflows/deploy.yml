@@ -1,16 +1,12 @@
-name: AI Daily Deploy
+name: Deploy to GitHub Pages
 
 on:
-  schedule:
-    # 每天 UTC 16:00 (北京时间 00:00) 自动生成并部署
-    - cron: '0 16 * * *'
-  workflow_dispatch:
-    # 手动触发
   push:
     branches: [main]
     paths:
-      - 'reports/*.md'
-      - 'generate_report.py'
+      - 'daily/*.md'
+      - 'index.md'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,22 +27,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Generate Daily Report
-        run: |
-          python3 generate_report.py
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
+
+      - name: Convert Markdown to HTML
+        run: |
+          pip install markdown beautifulsoup4
+          python convert.py
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'reports'
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -1,62 +1,24 @@
-# 🤖 AI Daily - 每日AI新闻简报
+# 🤖 AI Daily
 
-自动化的AI新闻日报生成与部署系统。
+每日AI新闻与工具推荐精选。
 
-## 📋 功能
+![Deploy](https://github.com/yunhongfeng-tracy/ai-daily/actions/workflows/daily.yml/badge.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 
-- 🤖 自动获取AI新闻摘要
-- 📅 每天自动生成日报
-- 🚀 自动部署到GitHub Pages
-- 📖 访问: https://你的用户名.github.io/ai-daily/
+## 📰 关于
 
-## 📁 目录结构
+每日更新AI领域重要新闻、工具推荐。所有内容均来自公开信息，标注来源并可跳转阅读。
 
-```
-ai-daily/
-├── .github/workflows/deploy.yml  # GitHub Actions部署配置
-├── reports/                       # 日报文件 (Markdown)
-│   └── ai-daily-YYYY-MM-DD.md
-├── scripts/
-│   └── generate_report.py         # 日报生成脚本
-├── docs/                          # GitHub Pages静态文件
-└── README.md
-```
+## 🛠️ 工具推荐
 
-## 🚀 快速开始
+| 名称 | 描述 | 链接 |
+|------|------|------|
+| 待更新 | - | - |
 
-### 1. Fork此仓库
+## 📂 历史归档
 
-### 2. 启用GitHub Pages
+- [2026-02-02](./daily/2026-02-02.md)
 
-1. 进入仓库 **Settings** → **Pages**
-2. Source 选择 **GitHub Actions**
-3. 保存
+---
 
-### 3. 启用Actions
-
-首次需要手动运行一次：
-- 进入 **Actions** 标签
-- 点击 **AI Daily Deploy** → **Run workflow**
-
-### 4. 自定义配置
-
-修改 `scripts/generate_report.py` 自定义日报格式。
-
-## ⏰ 自动执行时间
-
-- 每天 **北京时间 00:00** (UTC 16:00)
-- 手动触发: 点击 **Actions** → **Run workflow**
-
-## 📝 添加自定义内容
-
-修改 `scripts/generate_report.py` 中的 `TEMPLATE` 变量即可自定义日报模板。
-
-## 🛠️ 技术栈
-
-- Python 3.11+
-- GitHub Actions
-- GitHub Pages
-
-## 📄 许可证
-
-MIT
+*Powered by OpenClaw 🤗*
