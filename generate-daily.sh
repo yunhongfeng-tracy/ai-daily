@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 #
-# AI Daily Generator
-# 每日自动生成AI新闻和工具推荐
+# AI Daily Generator - 自动生成每日AI新闻和工具推荐
 #
 
 set -e
 
 REPO_DIR="/root/.openclaw/workspace/ai-daily"
 TODAY=$(date +%Y-%m-%d)
-BRAVE_API_KEY="${BRAVE_API_KEY}"
+BRAVE_API_KEY="${BRAVE_API_KEY:-BSABJykguZY7fMv9-C0etQUd4zEs1Yt}"
 GITHUB_TOKEN="${GITHUB_TOKEN}"
 
 echo "🤖 AI Daily Generator - ${TODAY}"
@@ -16,49 +15,116 @@ cd "$REPO_DIR"
 
 # 1. 搜索AI新闻
 echo "📰 搜索AI新闻..."
-NEWS_JSON=$(curl -s "https://api.search.brave.com/res/v1/web/search?q=AI+artificial+intelligence+news+today&count=8" \
+SEARCH_JSON=$(curl -s "https://api.search.brave.com/res/v1/web/search?q=AI+artificial+intelligence+news+today&count=10" \
     -H "Accept: application/json" \
     -H "X-Subscription-Token: $BRAVE_API_KEY" 2>/dev/null || echo "")
 
-# 2. 生成日报内容
-cat > "daily/${TODAY}.md" << 'HEADER'
-# AI Daily · DATE
+# 2. 构建新闻卡片
+build_news_card() {
+    local title="$1"
+    local url="$2"
+    local desc="$3"
+    local source="$4"
+    
+    # 清理描述（限制长度）
+    desc=$(echo "$desc" | sed 's/<[^>]*>//g' | sed 's/&[^;]*;//g' | xargs -I {} echo "{}" | head -c 150)
+    [[ ${#desc} -ge 150 ]] && desc="${desc}..."
+    
+    cat << EOF
 
-日期: DATE
+### $title
 
-HEADER
+来源: [$source]($url)
 
-# 添加新闻部分
-echo "## 📰 今日新闻" >> "daily/${TODAY}.md"
+$desc
 
-# 解析新闻并添加（简化版：使用搜索结果标题和链接）
-if [ -n "$NEWS_JSON" ]; then
-    echo "$NEWS_JSON" | python3 -c "
+[阅读原文]($url)
+
+---
+EOF
+}
+
+# 3. 生成日报
+echo "📝 生成日报..."
+
+cat > "daily/${TODAY}.md" << EOF
+# AI Daily · $TODAY
+
+日期: $TODAY
+
+## 📰 今日新闻
+
+EOF
+
+# 解析搜索结果并生成新闻卡片
+if [ -n "$SEARCH_JSON" ]; then
+    # 使用Python解析JSON更可靠
+    echo "$SEARCH_JSON" | python3 -c "
 import sys, json, re
+
+def clean_text(text):
+    if not text:
+        return ''
+    # 移除HTML标签
+    text = re.sub(r'<[^>]+>', '', text)
+    # 替换HTML实体
+    text = text.replace('&nbsp;', ' ').replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+    return text.strip()
+
 try:
-    d = json.load(sys.stdin)
-    for r in d.get('web', {}).get('results', [])[:5]:
-        title = r.get('title', '')[:50]
+    data = json.load(sys.stdin)
+    results = data.get('web', {}).get('results', [])[:5]
+    
+    for r in results:
+        title = clean_text(r.get('title', ''))
         url = r.get('url', '')
-        desc = r.get('description', '')[:100] if r.get('description') else ''
-        source = r.get('display_url', '').replace('https://', '').split('/')[0]
-        print(f'''
-### {title}
-
-来源: [{source}]({url})
-
-{desc}
-
-[阅读原文]({url})
-
----''')
-except: pass
+        desc = clean_text(r.get('description', ''))
+        
+        # 提取来源域名
+        source = '未知来源'
+        if url:
+            from urllib.parse import urlparse
+            source = urlparse(url).netloc
+            source = source.replace('www.', '').split('/')[0]
+        
+        # 清理标题中的特殊字符
+        title = re.sub(r'^[^a-zA-Z0-9]*', '', title)
+        
+        if title and url:
+            print()
+            print(f'### {title}')
+            print(f'Source: [{source}]({url})')
+            print()
+            if desc:
+                print(f'{desc[:150]}...' if len(desc) > 150 else desc)
+            print()
+            print(f'[阅读原文]({url})')
+            print()
+            print('---')
+            
+except Exception as e:
+    print(f'# 解析失败，使用备用方案', file=sys.stderr)
 " >> "daily/${TODAY}.md"
 fi
 
-# 添加工具推荐（复用之前的工具）
-echo "## 🛠️ 工具推荐" >> "daily/${TODAY}.md"
-cat >> "daily/${TODAY}.md" << 'TOOLS'
+# 如果没有搜索到结果，使用备用内容
+if ! grep -q "### " "daily/${TODAY}.md" 2>/dev/null; then
+    cat >> "daily/${TODAY}.md" << 'EOF'
+### AI行业动态
+
+来源: [综合报道]()
+
+今日暂无具体新闻更新，请关注AI领域的最新发展。
+
+[阅读原文]()
+
+---
+EOF
+fi
+
+# 4. 添加工具推荐
+cat >> "daily/${TODAY}.md" << 'EOF'
+## 🛠️ 工具推荐
 
 ### v0.dev - AI UI生成器
 
@@ -84,40 +150,38 @@ cat >> "daily/${TODAY}.md" << 'TOOLS'
 
 ---
 
-TOOLS
+EOF
 
-# 添加归档
+# 5. 添加归档
 echo "## 📚 归档" >> "daily/${TODAY}.md"
-echo "- [${TODAY}](./${TODAY}.html)" >> "daily/${TODAY}.md"
-
-# 替换日期占位符
-sed -i "s/DATE/$TODAY/g" "daily/${TODAY}.md"
+echo "- [$TODAY](./$TODAY.html)" >> "daily/${TODAY}.md"
 
 echo "✓ 创建日报: daily/${TODAY}.md"
 
-# 3. 更新README归档
-sed -i "/^- \[$TODAY/d" README.md
-sed -i "/^- \[20/a- [${TODAY}](./daily/${TODAY}.md)" README.md
-echo "✓ 更新README"
+# 6. 更新README归档
+if ! grep -q "$TODAY" README.md 2>/dev/null; then
+    sed -i "/^- \[$TODAY/d" README.md
+    sed -i "/^- \[20/a- [$TODAY](./daily/${TODAY}.md)" README.md
+    echo "✓ 更新README"
+fi
 
-# 4. 生成HTML
+# 7. 生成HTML
 python3 convert.py
 echo "✓ 生成HTML页面"
 
-# 5. 提交并推送
+# 8. 提交并推送
 if [ -n "$GITHUB_TOKEN" ]; then
-    git config user.name "tracy-bot"
-    git config user.email "bot@tracy.ai"
+    git config user.name "tracy-bot" 2>/dev/null || true
+    git config user.email "bot@tracy.ai" 2>/dev/null || true
     
     git add -A
-    git status
     
     if [ -n "$(git status --porcelain)" ]; then
-        git commit -m "AI Daily: ${TODAY}"
+        git commit -m "AI Daily: $TODAY"
         git push origin main
         echo "✓ 已推送到GitHub"
     else
-        echo "✓ 无变更，跳过提交"
+        echo "✓ 无新内容，跳过提交"
     fi
 else
     echo "⚠️ 未设置GITHUB_TOKEN"
