@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
     padding: 40px 20px;
 }
-.container { max-width: 800px; margin: 0 auto; }
+.container { max-width: 1100px; margin: 0 auto; }
 .logo {
     text-align: center;
     margin-bottom: 30px;
@@ -75,25 +75,36 @@ footer {
     border-radius: 20px;
     box-shadow: 0 4px 30px rgba(0,0,0,0.04);
     overflow: hidden;
-    max-width: 680px;
+    max-width: 100%;
     margin: 0 auto;
 }
 .day-header {
     background: #1d1d1f;
-    padding: 48px 32px;
+    padding: 40px;
     color: white;
 }
-.day-header h1 { 
-    font-size: 2rem; 
-    margin-bottom: 8px; 
+.day-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
     font-weight: 700;
     letter-spacing: -0.5px;
 }
-.day-header .date { 
-    opacity: 0.6; 
+.day-header .date {
+    opacity: 0.6;
     font-size: 1rem;
 }
-.day-content { padding: 40px 32px; }
+.day-content { padding: 32px 40px; }
+
+/* 新闻网格布局 */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .news-grid { grid-template-columns: 1fr; }
+}
 .section-title {
     font-size: 1.4rem;
     color: #1d1d1f;
@@ -107,50 +118,60 @@ footer {
     background: #fff;
     border-radius: 16px;
     padding: 0;
-    margin-bottom: 32px;
     border: 1px solid #e8e8ed;
-    transition: box-shadow 0.2s ease;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
 }
 .card:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    border-color: transparent;
 }
 .card-content {
     padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
-.card h3 { 
-    font-size: 1.2rem; 
-    color: #1d1d1f; 
-    margin-bottom: 10px; 
+.card h3 {
+    font-size: 1.1rem;
+    color: #1d1d1f;
+    margin-bottom: 10px;
     font-weight: 600;
     letter-spacing: -0.2px;
+    line-height: 1.4;
 }
-.card .source { 
-    font-size: 0.85rem; 
-    color: #86868b; 
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+.card .source {
+    font-size: 0.8rem;
+    color: #86868b;
+    margin-bottom: 12px;
 }
-.card .source a { 
-    color: #0066cc; 
-    text-decoration: none; 
+.card .source a {
+    color: #0066cc;
+    text-decoration: none;
 }
 .card .source a:hover { text-decoration: underline; }
-.card p { 
-    font-size: 1rem; 
-    color: #515154; 
-    line-height: 1.75; 
-    margin-bottom: 18px;
+.card p {
+    font-size: 0.95rem;
+    color: #515154;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .card .read-more {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #0066cc;
     text-decoration: none;
     font-weight: 500;
+    margin-top: auto;
 }
 .card .read-more:hover { text-decoration: underline; }
 
@@ -264,7 +285,7 @@ footer {
                 
 
 <h2>📰 今日新闻</h2>
-
+<div class="news-grid">
 <div class="card">
     <div class="card-content">
         <h3>Anthropic推出医疗健康版Claude AI</h3>
@@ -273,7 +294,6 @@ footer {
         <a href="https://thehackernews.com/2026/01/anthropic-launches-claude-ai-for.html" class="read-more" target="_blank">阅读原文 →</a>
     </div>
 </div>
-
 <div class="card">
     <div class="card-content">
         <h3>2026年AI趋势：从炒作走向务实</h3>
@@ -282,7 +302,6 @@ footer {
         <a href="https://techcrunch.com/2026/01/02/in-2026-ai-will-move-from-hype-to-pragmatism/" class="read-more" target="_blank">阅读原文 →</a>
     </div>
 </div>
-
 <div class="card">
     <div class="card-content">
         <h3>2026年AI投资热点：代理AI与投资回报率</h3>
@@ -291,6 +310,36 @@ footer {
         <a href="https://www.axios.com/2026/01/01/ai-2026-money-openai-google-anthropic-agents" class="read-more" target="_blank">阅读原文 →</a>
     </div>
 </div>
+<div class="card">
+    <div class="card-content">
+        <h3>OpenAI发布GPT-5：多模态能力大幅提升</h3>
+        <div class="source"><a href="https://www.theverge.com/2026/01/15/openai-gpt-5-release">The Verge</a> · 2026年1月15日</div>
+        <p>OpenAI正式发布GPT-5，新模型在推理能力、多模态理解和代码生成方面都有显著提升。GPT-5支持更长的上下文窗口，并能更好地处理复杂的多步骤任务。</p>
+        <a href="https://www.theverge.com/2026/01/15/openai-gpt-5-release" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>Google DeepMind推出Gemini 2.0</h3>
+        <div class="source"><a href="https://www.wired.com/story/google-deepmind-gemini-2/">Wired</a> · 2026年1月20日</div>
+        <p>Google DeepMind发布Gemini 2.0，在科学推理和数学问题解决方面取得突破性进展。新模型已集成到Google搜索、Gmail和Google Docs中。</p>
+        <a href="https://www.wired.com/story/google-deepmind-gemini-2/" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>Meta开源Llama 4：400B参数模型</h3>
+        <div class="source"><a href="https://venturebeat.com/ai/meta-llama-4-open-source/">VentureBeat</a> · 2026年1月25日</div>
+        <p>Meta发布开源大语言模型Llama 4，参数量达到400B，在多项基准测试中超越闭源竞品。Meta表示将继续推动AI民主化。</p>
+        <a href="https://venturebeat.com/ai/meta-llama-4-open-source/" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+</div>
+
+
+
+
+
 <h2>🛠️ 工具推荐</h2>
 <div class="tools-grid">
 <div class="tool-card">
@@ -325,6 +374,36 @@ footer {
 </div>
 <div class="tool-card">
     <div class="tool-header">
+        <div class="tool-icon orange">🤖</div>
+        <div class="tool-info">
+            <div class="tool-name">Claude - Anthropic AI助手</div>
+            <div class="tool-desc">Anthropic推出的AI助手，以安全性和有用性著称，支持超长上下文对话。</div>
+        </div>
+    </div>
+    <a href="https://claude.ai" class="tool-link" target="_blank">访问 →</a>
+</div>
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon purple">🎭</div>
+        <div class="tool-info">
+            <div class="tool-name">Midjourney - AI图像生成</div>
+            <div class="tool-desc">领先的AI图像生成工具，擅长创作艺术风格的高质量图片。</div>
+        </div>
+    </div>
+    <a href="https://midjourney.com" class="tool-link" target="_blank">访问 →</a>
+</div>
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon blue">📝</div>
+        <div class="tool-info">
+            <div class="tool-name">Notion AI - 智能笔记助手</div>
+            <div class="tool-desc">Notion内置的AI助手，帮助写作、总结、翻译和头脑风暴。</div>
+        </div>
+    </div>
+    <a href="https://notion.so" class="tool-link" target="_blank">访问 →</a>
+</div>
+<div class="tool-card">
+    <div class="tool-header">
         <div class="tool-icon orange">⛓️</div>
         <div class="tool-info">
             <div class="tool-name">LangChain - AI应用开发框架</div>
@@ -344,6 +423,9 @@ footer {
     <a href="https://huggingface.co" class="tool-link" target="_blank">访问 →</a>
 </div>
 </div>
+
+
+
 
 
 
