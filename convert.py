@@ -159,63 +159,89 @@ footer {
 }
 .card .read-more:hover { text-decoration: underline; }
 
-/* 工具卡片 - 更大卡片风格 */
+/* 工具卡片网格 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+@media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+}
 .tool-card {
-    display: block;
     background: #fff;
     border-radius: 16px;
-    padding: 28px;
-    margin-bottom: 20px;
+    padding: 20px;
     border: 1px solid #e8e8ed;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
 }
 .tool-card:hover {
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    border-color: transparent;
 }
 .tool-header {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 14px;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 .tool-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
+    flex-shrink: 0;
 }
-.tool-info { flex: 1; }
-.tool-name { 
-    font-size: 1.15rem; 
-    font-weight: 600; 
-    color: #1d1d1f; 
-    margin-bottom: 3px;
+.tool-icon.purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.tool-icon.blue { background: linear-gradient(135deg, #0066cc 0%, #5ac8fa 100%); }
+.tool-icon.green { background: linear-gradient(135deg, #34c759 0%, #30d158 100%); }
+.tool-icon.orange { background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); }
+.tool-icon.pink { background: linear-gradient(135deg, #ff2d55 0%, #ff6b9d 100%); }
+.tool-icon.teal { background: linear-gradient(135deg, #5ac8fa 0%, #64d2ff 100%); }
+.tool-info { flex: 1; min-width: 0; }
+.tool-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+    line-height: 1.3;
 }
-.tool-desc { 
-    font-size: 0.95rem; 
-    color: #515154; 
+.tool-desc {
+    font-size: 0.85rem;
+    color: #6e6e73;
     line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 .tool-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: #1d1d1f;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    color: #0066cc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #0066cc;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 500;
-    margin-top: 16px;
-    transition: background 0.2s;
+    margin-top: auto;
+    transition: all 0.2s;
 }
-.tool-link:hover { background: #424245; }
+.tool-link:hover {
+    background: #0066cc;
+    color: white;
+}
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -315,22 +341,27 @@ def generate_daily_pages():
     """生成每个日报页面"""
     files = get_daily_files()
     
-    # 工具图标配置
-    tool_icons = {
-        'v0': '🎨',
-        'cursor': '💻',
-        'perplexity': '🔍',
-        'langchain': '⛓️',
-        'hugging': '🤗',
-        'default': '🛠️'
+    # 工具图标和颜色配置
+    tool_config = {
+        'v0': {'icon': '🎨', 'color': 'purple'},
+        'cursor': {'icon': '💻', 'color': 'blue'},
+        'perplexity': {'icon': '🔍', 'color': 'teal'},
+        'langchain': {'icon': '⛓️', 'color': 'orange'},
+        'hugging': {'icon': '🤗', 'color': 'pink'},
+        'claude': {'icon': '🤖', 'color': 'orange'},
+        'chatgpt': {'icon': '💬', 'color': 'green'},
+        'midjourney': {'icon': '🎭', 'color': 'purple'},
+        'notion': {'icon': '📝', 'color': 'blue'},
+        'github': {'icon': '🐙', 'color': 'purple'},
+        'default': {'icon': '🛠️', 'color': 'blue'}
     }
-    
-    def get_tool_icon(name):
+
+    def get_tool_config(name):
         name_lower = name.lower()
-        for key, icon in tool_icons.items():
+        for key, config in tool_config.items():
             if key in name_lower:
-                return icon
-        return tool_icons['default']
+                return config
+        return tool_config['default']
     
     for f in files:
         title, date, content = parse_daily_file(f'daily/{f}')
@@ -375,17 +406,17 @@ def generate_daily_pages():
             flags=re.DOTALL
         )
 
-        # 处理工具卡片 - 添加图标
+        # 处理工具卡片 - 添加图标和颜色
+        tool_cards = []
         def replace_tool(match):
             tool_name = match.group(1) if match.group(1) else ''
             tool_desc = match.group(2) if match.group(2) else ''
             tool_link = match.group(3) if match.group(3) else '#'
-            icon = get_tool_icon(tool_name)
+            config = get_tool_config(tool_name)
 
-            return f'''
-<div class="tool-card">
+            card = f'''<div class="tool-card">
     <div class="tool-header">
-        <div class="tool-icon">{icon}</div>
+        <div class="tool-icon {config['color']}">{config['icon']}</div>
         <div class="tool-info">
             <div class="tool-name">{tool_name}</div>
             <div class="tool-desc">{tool_desc}</div>
@@ -393,6 +424,8 @@ def generate_daily_pages():
     </div>
     <a href="{tool_link}" class="tool-link" target="_blank">访问 →</a>
 </div>'''
+            tool_cards.append(card)
+            return '<!--TOOL_PLACEHOLDER-->'
 
         # 转换工具推荐格式: <h3>工具名</h3><p>📝 描述</p><p>🔗 <a>访问</a></p>
         html_content = re.sub(
@@ -401,6 +434,13 @@ def generate_daily_pages():
             html_content,
             flags=re.DOTALL
         )
+
+        # 将工具卡片包装在网格容器中
+        if tool_cards:
+            tools_grid = '<div class="tools-grid">\n' + '\n'.join(tool_cards) + '\n</div>'
+            # 替换第一个占位符为网格，删除其余占位符
+            html_content = html_content.replace('<!--TOOL_PLACEHOLDER-->', tools_grid, 1)
+            html_content = html_content.replace('<!--TOOL_PLACEHOLDER-->', '')
 
         # 清理多余的 <hr> 标签
         html_content = re.sub(r'<hr\s*/?>', '', html_content)
