@@ -291,7 +291,7 @@ def parse_daily_file(filepath):
         content = f.read()
     
     title_match = re.search(r'^# (.+)$', content, re.MULTILINE)
-    date_match = re.search(r'^日期: (\d{4}-\d{2}-\d{2})$', content, re.MULTILINE)
+    date_match = re.search(r'^日期: (\d{4}-\d{2}-\d{2}(?:\s+\d{2}:\d{2})?)', content, re.MULTILINE)
     
     title = title_match.group(1) if title_match else 'AI Daily'
     date = date_match.group(1) if date_match else ''
@@ -313,10 +313,16 @@ def generate_index_html():
         date_str = f.replace('.md', '')
         title, date, _ = parse_daily_file(f'daily/{f}')
         
-        # 格式化日期显示
+        # 格式化日期显示（精确到分钟）
         try:
-            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-            date_display = date_obj.strftime('%Y年%m月%d日')
+            if ' ' in date and ':' in date:
+                # 格式: 2026-02-02 09:30
+                date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M')
+                date_display = date_obj.strftime('%Y年%m月%d日 %H:%M')
+            else:
+                # 格式: 2026-02-02
+                date_obj = datetime.strptime(date, '%Y-%m-%d')
+                date_display = date_obj.strftime('%Y年%m月%d日')
         except:
             date_display = date
         
@@ -387,10 +393,14 @@ def generate_daily_pages():
     for f in files:
         title, date, content = parse_daily_file(f'daily/{f}')
         
-        # 格式化日期
+        # 格式化日期（精确到分钟）
         try:
-            date_obj = datetime.strptime(date, '%Y-%m-%d')
-            date_display = date_obj.strftime('%Y年%m月%d日')
+            if ' ' in date and ':' in date:
+                date_obj = datetime.strptime(date, '%Y-%m-%d %H:%M')
+                date_display = date_obj.strftime('%Y年%m月%d日 %H:%M')
+            else:
+                date_obj = datetime.strptime(date, '%Y-%m-%d')
+                date_display = date_obj.strftime('%Y年%m月%d日')
         except:
             date_display = date
         
