@@ -7,6 +7,7 @@ import os
 import re
 import json
 import subprocess
+import urllib.request
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -14,53 +15,77 @@ from urllib.parse import urlparse
 REPO_DIR = "/root/.openclaw/workspace/ai-daily"
 TODAY = datetime.now().strftime('%Y-%m-%d')
 NOW = datetime.now().strftime('%Y-%m-%d %H:%M')
-BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY')
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', 'sk-7bc8f2dcf1734756bd81c55af2413f80')
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
 
-# 简单翻译字典（常见AI术语）
-TRANSLATIONS = {
-    'AI': '人工智能',
-    'Artificial Intelligence': '人工智能',
-    'Machine Learning': '机器学习',
-    'Deep Learning': '深度学习',
-    'LLM': '大语言模型',
-    'GPT': 'GPT',
-    'Claude': 'Claude',
-    'OpenAI': 'OpenAI',
-    'Anthropic': 'Anthropic',
-    'Google': '谷歌',
-    'Microsoft': '微软',
-    'Amazon': '亚马逊',
-    'Meta': 'Meta',
-    'Apple': '苹果',
-    'NVIDIA': '英伟达',
-    'Tech': '科技',
-    'News': '新闻',
-    'Latest': '最新',
-    'Update': '更新',
-    'Research': '研究',
-    'Development': '开发',
-    'Innovation': '创新',
-    'Report': '报告',
-    'Analysis': '分析',
-    'China': '中国',
-    'US': '美国',
-    'UK': '英国',
-    'EU': '欧盟',
-    'India': '印度',
-    'Reuters': '路透社',
-    'BBC': 'BBC',
-    'MIT': '麻省理工',
-    'TechCrunch': 'TechCrunch',
-}
-
-def translate(text):
-    """简单翻译（基于词典）"""
-    if not text:
-        return ''
-    for eng, chi in TRANSLATIONS.items():
-        text = re.sub(r'\b' + re.escape(eng) + r'\b', chi, text, flags=re.IGNORECASE)
-    return text.strip()
+# DeepSeek翻译函数
+def translate_with_deepseek(text):
+    """使用DeepSeek API翻译为中文"""
+    if not text or len(text.strip()) < 5:
+        return text
+    
+    # 简单术语直接查词典（快速）
+    simple_trans = {
+        'AI': '人工智能',
+        'Artificial Intelligence': '人工智能',
+        'Machine Learning': '机器学习',
+        'Deep Learning': '深度学习',
+        'LLM': '大语言模型',
+        'OpenAI': 'OpenAI',
+        'Anthropic': 'Anthropic',
+        'Google': '谷歌',
+        'Microsoft': '微软',
+        'Reuters': '路透社',
+        'BBC': 'BBC',
+        'MIT': '麻省理工',
+        'TechCrunch': 'TechCrunch',
+        'NVIDIA': '英伟达',
+        'Meta': 'Meta',
+        'Amazon': '亚马逊',
+        'Apple': '苹果',
+    }
+    
+    # 先做简单替换
+    result = text
+    for eng, chi in simple_trans.items():
+        result = re.sub(r'\b' + re.escape(eng) + r'\b', chi, result, flags=re.IGNORECASE)
+    
+    # 如果包含复杂句子，用DeepSeek翻译
+    if len(text) > 30 and not text.startswith('http'):
+        try:
+            url = "https://api.deepseek.com/chat/completions"
+            payload = {
+                "model": "deepseek-chat",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "你是一个专业的AI科技新闻翻译。请将英文翻译成简洁的中文，保留专业术语的准确性。只需输出翻译结果，不要其他内容。"
+                    },
+                    {
+                        "role": "user",
+                        "content": f"翻译这段英文新闻标题和摘要：\n\n{text}"
+                    }
+                ],
+                "max_tokens": 500,
+                "temperature": 0.3
+            }
+            
+            data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(url, data=data, method='POST')
+            req.add_header('Content-Type', 'application/json')
+            req.add_header('Authorization', f'Bearer {DEEPSEEK_API_KEY}')
+            
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result_data = json.loads(response.read().decode('utf-8'))
+                translated = result_data['choices'][0]['message']['content'].strip()
+                # 清理可能的引号
+                translated = re.sub(r'^["\']|["\']$', '', translated)
+                return translated
+        except Exception as e:
+            print(f"  翻译API调用失败: {e}")
+            return result
+    
+    return result
 
 def clean_text(text):
     """清理文本"""
@@ -109,7 +134,7 @@ def search_news():
     print(f"🤖 AI Daily Generator - {TODAY}")
     print("📰 搜索AI新闻...")
     
-    import urllib.request
+    BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY', 'BSABJykguZY7fMv9-C0etQUd4zEs1Yt')
     url = f"https://api.search.brave.com/res/v1/web/search?q=AI+artificial+intelligence+news+today&count=8"
     req = urllib.request.Request(url, headers={
         'Accept': 'application/json',
@@ -144,21 +169,16 @@ def generate_daily():
                 desc = clean_text(item.get('description', ''))
                 
                 if title and url:
-                    # 翻译标题
-                    title_cn = translate(title)
-                    # 如果翻译后变化不大，使用原文
-                    if len(title_cn) < len(title) * 0.5:
-                        title_cn = title
+                    # 使用DeepSeek翻译标题
+                    title_cn = translate_with_deepseek(title)
                     
                     source = get_source_name(url)
                     
                     f.write(f"### {title_cn}\n\n")
                     f.write(f"来源: [{source}]({url})\n\n")
                     if desc:
-                        # 描述翻译（简单处理）
-                        desc_cn = translate(desc)
-                        if len(desc_cn) < len(desc) * 0.5:
-                            desc_cn = desc[:200] + ('...' if len(desc) > 200 else '')
+                        # 使用DeepSeek翻译描述
+                        desc_cn = translate_with_deepseek(desc)
                         f.write(f"{desc_cn}\n\n")
                     f.write(f"[阅读原文]({url})\n\n")
                     f.write("---\n\n")
@@ -214,8 +234,9 @@ def commit_and_push():
     print("📤 推送到GitHub...")
     
     # 设置remote
-    remote_url = f"https://{GITHUB_TOKEN}@github.com/yunhongfeng-tracy/ai-daily.git"
-    subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], cwd=REPO_DIR, capture_output=True)
+    if GITHUB_TOKEN:
+        remote_url = f"https://{GITHUB_TOKEN}@github.com/yunhongfeng-tracy/ai-daily.git"
+        subprocess.run(['git', 'remote', 'set-url', 'origin', remote_url], cwd=REPO_DIR, capture_output=True)
     
     # 配置git
     subprocess.run(['git', 'config', 'user.name', 'tracy-bot'], cwd=REPO_DIR, capture_output=True)
@@ -227,8 +248,9 @@ def commit_and_push():
     
     if result.stdout.strip():
         subprocess.run(['git', 'commit', '-m', f'AI Daily: {TODAY}'], cwd=REPO_DIR, capture_output=True)
-        subprocess.run(['git', 'push', 'origin', 'main'], cwd=REPO_DIR, capture_output=True)
-        print("✓ 已推送到GitHub")
+        if GITHUB_TOKEN:
+            subprocess.run(['git', 'push', 'origin', 'main'], cwd=REPO_DIR, capture_output=True)
+            print("✓ 已推送到GitHub")
     else:
         print("✓ 无新内容，跳过提交")
 
