@@ -142,10 +142,17 @@ footer {
 .card h3 {
     font-size: 1.1rem;
     color: #1d1d1f;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     font-weight: 600;
     letter-spacing: -0.2px;
     line-height: 1.4;
+}
+.card .original-title {
+    font-size: 0.75rem;
+    color: #86868b;
+    margin-bottom: 10px;
+    font-style: italic;
+    line-height: 1.3;
 }
 .card .source {
     font-size: 0.8rem;
@@ -286,17 +293,19 @@ def get_daily_files():
     return files
 
 def parse_daily_file(filepath):
-    """解析日报文件，提取标题和日期"""
+    """解析日报文件，提取标题、日期和发布时间"""
     with open(filepath, 'r', encoding='utf-8') as f:
         content = f.read()
-    
+
     title_match = re.search(r'^# (.+)$', content, re.MULTILINE)
     date_match = re.search(r'^日期: (\d{4}-\d{2}-\d{2})$', content, re.MULTILINE)
-    
+    time_match = re.search(r'^发布时间: (\d{2}:\d{2})$', content, re.MULTILINE)
+
     title = title_match.group(1) if title_match else 'AI Daily'
     date = date_match.group(1) if date_match else ''
-    
-    return title, date, content
+    publish_time = time_match.group(1) if time_match else ''
+
+    return title, date, publish_time, content
 
 def convert_markdown(content):
     """简单Markdown转HTML"""
@@ -307,22 +316,25 @@ def convert_markdown(content):
 def generate_index_html():
     """生成首页"""
     files = get_daily_files()
-    
+
     items_html = ''
     for f in files:
         date_str = f.replace('.md', '')
-        title, date, _ = parse_daily_file(f'daily/{f}')
-        
+        title, date, publish_time, _ = parse_daily_file(f'daily/{f}')
+
         # 格式化日期显示
         try:
             date_obj = datetime.strptime(date_str, '%Y-%m-%d')
             date_display = date_obj.strftime('%Y年%m月%d日')
         except:
             date_display = date
-        
+
+        # 显示发布时间
+        time_display = f' · {publish_time}' if publish_time else ''
+
         items_html += f'''
 <a href="./daily/{f.replace('.md', '.html')}" class="archive-item">
-    <div class="archive-date">{date_display}</div>
+    <div class="archive-date">{date_display}{time_display}</div>
     <div class="archive-title">{title}</div>
     <span class="archive-arrow">→</span>
 </a>'''
@@ -348,12 +360,12 @@ def generate_index_html():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a> · <a href="./config.html" style="color:#0066cc;">配置</a>
         </footer>
     </div>
 </body>
 </html>"""
-    
+
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"✓ 生成首页: index.html")
@@ -385,24 +397,51 @@ def generate_daily_pages():
         return tool_config['default']
     
     for f in files:
-        title, date, content = parse_daily_file(f'daily/{f}')
-        
+        title, date, publish_time, content = parse_daily_file(f'daily/{f}')
+
         # 格式化日期
         try:
             date_obj = datetime.strptime(date, '%Y-%m-%d')
             date_display = date_obj.strftime('%Y年%m月%d日')
         except:
             date_display = date
-        
+
+        # 添加发布时间
+        time_display = f' {publish_time}' if publish_time else ''
+
         html_content = convert_markdown(content)
 
-        # 移除标题行和日期行（因为我们在header中显示）
+        # 移除标题行、日期行和发布时间行（因为我们在header中显示）
         html_content = re.sub(r'^<h1>.*?</h1>', '', html_content, flags=re.MULTILINE)
         html_content = re.sub(r'^<p>日期:.*?</p>', '', html_content, flags=re.MULTILINE)
+        html_content = re.sub(r'^<p>发布时间:.*?</p>', '', html_content, flags=re.MULTILINE)
 
-        # 处理新闻卡片
+        # 处理新闻卡片（支持新旧两种格式）
         news_cards = []
-        def replace_news(match):
+        def replace_news_new(match):
+            title_zh = match.group(1)
+            title_orig = match.group(2) if match.group(2) else ''
+            source_link = match.group(3)
+            source_name = match.group(4)
+            summary = match.group(5)
+            read_link = match.group(6)
+
+            # 原标题显示
+            orig_html = f'<div class="original-title">{title_orig}</div>' if title_orig else ''
+
+            card = f'''<div class="card">
+    <div class="card-content">
+        <h3>{title_zh}</h3>
+        {orig_html}
+        <div class="source"><a href="{source_link}">{source_name}</a></div>
+        <p>{summary}</p>
+        <a href="{read_link}" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>'''
+            news_cards.append(card)
+            return '<!--NEWS_PLACEHOLDER-->'
+
+        def replace_news_old(match):
             title = match.group(1)
             source_link = match.group(2)
             source_name = match.group(3)
@@ -421,10 +460,26 @@ def generate_daily_pages():
             news_cards.append(card)
             return '<!--NEWS_PLACEHOLDER-->'
 
-        # 转换新闻格式: <h3>标题</h3><p>来源: <a>...</a> · 日期</p><p>摘要</p><p><a>阅读原文</a></p>
+        # 新格式: <h3>中文标题</h3><p>原标题: xxx</p><p>来源: <a>...</a></p><blockquote>概述</blockquote><p><a>阅读原文</a></p>
+        html_content = re.sub(
+            r'<h3>([^<]+)</h3>\s*(?:<p>原标题:\s*([^<]+)</p>\s*)?<p>来源:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a></p>\s*<blockquote>\s*<p>([^<]+)</p>\s*</blockquote>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
+            replace_news_new,
+            html_content,
+            flags=re.DOTALL
+        )
+
+        # 旧格式兼容: <h3>标题</h3><p>来源: <a>...</a> · 日期</p><p>摘要</p><p><a>阅读原文</a></p>
         html_content = re.sub(
             r'<h3>([^<]+)</h3>\s*<p>来源:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>\s*·\s*([^<]+)</p>\s*<p>([^<]+)</p>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
-            replace_news,
+            replace_news_old,
+            html_content,
+            flags=re.DOTALL
+        )
+
+        # 兼容 Source: 格式（旧的英文格式）
+        html_content = re.sub(
+            r'<h3>([^<]+)</h3>\s*<p>Source:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a></p>\s*<p>([^<]+)</p>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
+            lambda m: replace_news_old(type('', (), {'group': lambda self, i: [None, m.group(1), m.group(2), m.group(3), '', m.group(4), m.group(5)][i]})()),
             html_content,
             flags=re.DOTALL
         )
@@ -489,7 +544,7 @@ def generate_daily_pages():
         <div class="day-page">
             <div class="day-header">
                 <h1>{title}</h1>
-                <p class="date">{date_display}</p>
+                <p class="date">{date_display}{time_display}</p>
             </div>
             <div class="day-content">
                 {html_content}
@@ -497,12 +552,12 @@ def generate_daily_pages():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a> · <a href="../config.html" style="color:#0066cc;">配置</a>
         </footer>
     </div>
 </body>
 </html>"""
-        
+
         os.makedirs('daily', exist_ok=True)
         with open(f'daily/{f.replace(".md", ".html")}', 'w', encoding='utf-8') as file:
             file.write(html)

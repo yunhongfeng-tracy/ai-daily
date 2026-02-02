@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Daily - 配置管理</title>
+    <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 800px; margin: 0 auto; }
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.header h1 {
+    font-size: 1.8rem;
+    color: #1d1d1f;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.header p { color: #86868b; font-size: 0.95rem; }
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #515154;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #1d1d1f; }
+
+/* 配置卡片 */
+.config-section {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+.section-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+.section-desc {
+    font-size: 0.85rem;
+    color: #86868b;
+    margin-top: 4px;
+}
+
+/* 源列表 */
+.source-list {
+    padding: 0;
+}
+.source-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+.source-item:last-child { border-bottom: none; }
+.source-item:hover { background: #fafafa; }
+.source-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-right: 14px;
+    flex-shrink: 0;
+}
+.source-info { flex: 1; min-width: 0; }
+.source-name {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1d1d1f;
+    margin-bottom: 3px;
+}
+.source-query {
+    font-size: 0.8rem;
+    color: #86868b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.source-toggle {
+    position: relative;
+    width: 50px;
+    height: 30px;
+    margin-left: 12px;
+}
+.source-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e5e5e5;
+    transition: .3s;
+    border-radius: 30px;
+}
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+input:checked + .toggle-slider {
+    background-color: #34c759;
+}
+input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
+.source-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+}
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 1rem;
+}
+.btn-icon:hover { background: #f0f0f0; }
+.btn-icon.delete:hover { background: #ffebee; color: #d32f2f; }
+
+/* 添加源按钮 */
+.add-source-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    border: 2px dashed #e0e0e0;
+    border-radius: 12px;
+    background: transparent;
+    color: #86868b;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+}
+.add-source-btn:hover {
+    border-color: #0066cc;
+    color: #0066cc;
+    background: #f0f7ff;
+}
+
+/* 设置项 */
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.setting-item:last-child { border-bottom: none; }
+.setting-label {
+    font-size: 0.95rem;
+    color: #1d1d1f;
+}
+.setting-desc {
+    font-size: 0.8rem;
+    color: #86868b;
+    margin-top: 2px;
+}
+.setting-input {
+    width: 80px;
+    padding: 8px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+.setting-input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
+/* 模态框 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: modalIn 0.2s ease;
+}
+@keyframes modalIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+.modal-body { padding: 24px; }
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+}
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+.form-input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+.icon-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.icon-option {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.icon-option:hover { border-color: #0066cc; }
+.icon-option.selected {
+    border-color: #0066cc;
+    background: #f0f7ff;
+}
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+.btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+.btn-secondary {
+    background: #f0f0f0;
+    color: #1d1d1f;
+}
+.btn-secondary:hover { background: #e5e5e5; }
+.btn-primary {
+    background: #0066cc;
+    color: white;
+}
+.btn-primary:hover { background: #0055aa; }
+
+/* 保存按钮 */
+.save-section {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+.save-btn {
+    padding: 14px 40px;
+    background: #1d1d1f;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.save-btn:hover { background: #333; transform: translateY(-2px); }
+.save-btn:active { transform: translateY(0); }
+
+/* Toast提示 */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1d1d1f;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 2000;
+}
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #86868b;
+    font-size: 0.85rem;
+}
+footer a { color: #0066cc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="back-link">← 返回首页</a>
+
+        <div class="header">
+            <h1>配置管理</h1>
+            <p>管理新闻源和日报设置</p>
+        </div>
+
+        <!-- 新闻源配置 -->
+        <div class="config-section">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">新闻源</div>
+                    <div class="section-desc">管理AI日报的新闻来源</div>
+                </div>
+            </div>
+            <div class="source-list" id="sourceList">
+                <!-- 动态生成 -->
+            </div>
+            <div style="padding: 16px 24px;">
+                <button class="add-source-btn" onclick="showAddModal()">
+                    <span>+</span> 添加新闻源
+                </button>
+            </div>
+        </div>
+
+        <!-- 通用设置 -->
+        <div class="config-section">
+            <div class="section-header">
+                <div>
+                    <div class="section-title">通用设置</div>
+                    <div class="section-desc">日报生成相关配置</div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">每个源的结果数量</div>
+                    <div class="setting-desc">每个新闻源获取的文章数量</div>
+                </div>
+                <input type="number" class="setting-input" id="resultsPerSource" min="1" max="10" value="3">
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">标题翻译为中文</div>
+                    <div class="setting-desc">自动将英文标题翻译为中文</div>
+                </div>
+                <label class="source-toggle">
+                    <input type="checkbox" id="translateTitles" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">生成内容概述</div>
+                    <div class="setting-desc">为每篇文章生成简短的中文概述</div>
+                </div>
+                <label class="source-toggle">
+                    <input type="checkbox" id="generateSummary" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="save-section">
+            <button class="save-btn" onclick="saveConfig()">保存配置</button>
+        </div>
+
+        <footer>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
+        </footer>
+    </div>
+
+    <!-- 添加/编辑源模态框 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">添加新闻源</div>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editingSourceId">
+                <div class="form-group">
+                    <label class="form-label">名称</label>
+                    <input type="text" class="form-input" id="sourceName" placeholder="例如：AI综合新闻">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">搜索关键词</label>
+                    <input type="text" class="form-input" id="sourceQuery" placeholder="例如：AI artificial intelligence news">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">图标</label>
+                    <div class="icon-selector" id="iconSelector">
+                        <div class="icon-option selected" data-icon="🤖">🤖</div>
+                        <div class="icon-option" data-icon="💬">💬</div>
+                        <div class="icon-option" data-icon="🛠️">🛠️</div>
+                        <div class="icon-option" data-icon="🔬">🔬</div>
+                        <div class="icon-option" data-icon="📰">📰</div>
+                        <div class="icon-option" data-icon="🎨">🎨</div>
+                        <div class="icon-option" data-icon="💡">💡</div>
+                        <div class="icon-option" data-icon="🚀">🚀</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal()">取消</button>
+                <button class="btn btn-primary" onclick="saveSource()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast提示 -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+// 配置数据
+let config = {
+    sources: [],
+    settings: {
+        results_per_source: 3,
+        translate_titles: true,
+        generate_summary: true,
+        language: "zh-CN"
+    }
+};
+
+// 加载配置
+async function loadConfig() {
+    try {
+        const response = await fetch('./sources.json');
+        if (response.ok) {
+            config = await response.json();
+        }
+    } catch (e) {
+        console.log('Using default config');
+    }
+    renderSources();
+    renderSettings();
+}
+
+// 渲染源列表
+function renderSources() {
+    const list = document.getElementById('sourceList');
+    list.innerHTML = config.sources.map((source, index) => `
+        <div class="source-item" data-id="${source.id}">
+            <div class="source-icon">${source.icon}</div>
+            <div class="source-info">
+                <div class="source-name">${source.name}</div>
+                <div class="source-query">${source.query}</div>
+            </div>
+            <label class="source-toggle">
+                <input type="checkbox" ${source.enabled ? 'checked' : ''} onchange="toggleSource('${source.id}')">
+                <span class="toggle-slider"></span>
+            </label>
+            <div class="source-actions">
+                <button class="btn-icon" onclick="editSource('${source.id}')" title="编辑">✏️</button>
+                <button class="btn-icon delete" onclick="deleteSource('${source.id}')" title="删除">🗑️</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 渲染设置
+function renderSettings() {
+    document.getElementById('resultsPerSource').value = config.settings.results_per_source;
+    document.getElementById('translateTitles').checked = config.settings.translate_titles;
+    document.getElementById('generateSummary').checked = config.settings.generate_summary;
+}
+
+// 切换源启用状态
+function toggleSource(id) {
+    const source = config.sources.find(s => s.id === id);
+    if (source) {
+        source.enabled = !source.enabled;
+    }
+}
+
+// 显示添加模态框
+function showAddModal() {
+    document.getElementById('modalTitle').textContent = '添加新闻源';
+    document.getElementById('editingSourceId').value = '';
+    document.getElementById('sourceName').value = '';
+    document.getElementById('sourceQuery').value = '';
+    selectIcon('🤖');
+    document.getElementById('modalOverlay').classList.add('active');
+}
+
+// 编辑源
+function editSource(id) {
+    const source = config.sources.find(s => s.id === id);
+    if (source) {
+        document.getElementById('modalTitle').textContent = '编辑新闻源';
+        document.getElementById('editingSourceId').value = id;
+        document.getElementById('sourceName').value = source.name;
+        document.getElementById('sourceQuery').value = source.query;
+        selectIcon(source.icon);
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+}
+
+// 删除源
+function deleteSource(id) {
+    if (confirm('确定要删除这个新闻源吗？')) {
+        config.sources = config.sources.filter(s => s.id !== id);
+        renderSources();
+        showToast('已删除新闻源');
+    }
+}
+
+// 隐藏模态框
+function hideModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+}
+
+// 选择图标
+function selectIcon(icon) {
+    document.querySelectorAll('.icon-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.icon === icon);
+    });
+}
+
+// 图标点击事件
+document.getElementById('iconSelector').addEventListener('click', (e) => {
+    if (e.target.classList.contains('icon-option')) {
+        selectIcon(e.target.dataset.icon);
+    }
+});
+
+// 保存源
+function saveSource() {
+    const name = document.getElementById('sourceName').value.trim();
+    const query = document.getElementById('sourceQuery').value.trim();
+    const icon = document.querySelector('.icon-option.selected')?.dataset.icon || '🤖';
+    const editingId = document.getElementById('editingSourceId').value;
+
+    if (!name || !query) {
+        showToast('请填写名称和搜索关键词');
+        return;
+    }
+
+    if (editingId) {
+        // 编辑模式
+        const source = config.sources.find(s => s.id === editingId);
+        if (source) {
+            source.name = name;
+            source.query = query;
+            source.icon = icon;
+        }
+    } else {
+        // 添加模式
+        const id = 'source_' + Date.now();
+        config.sources.push({
+            id: id,
+            name: name,
+            query: query,
+            enabled: true,
+            icon: icon
+        });
+    }
+
+    renderSources();
+    hideModal();
+    showToast(editingId ? '已更新新闻源' : '已添加新闻源');
+}
+
+// 保存配置
+function saveConfig() {
+    config.settings.results_per_source = parseInt(document.getElementById('resultsPerSource').value) || 3;
+    config.settings.translate_titles = document.getElementById('translateTitles').checked;
+    config.settings.generate_summary = document.getElementById('generateSummary').checked;
+
+    // 生成配置文件内容
+    const configJson = JSON.stringify(config, null, 2);
+
+    // 创建下载链接
+    const blob = new Blob([configJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sources.json';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast('配置已保存，请将 sources.json 放到项目根目录');
+}
+
+// 显示Toast
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// 点击遮罩关闭模态框
+document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+        hideModal();
+    }
+});
+
+// 初始化
+loadConfig();
+    </script>
+</body>
+</html>

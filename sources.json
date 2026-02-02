@@ -1,0 +1,38 @@
+{
+  "sources": [
+    {
+      "id": "ai_news",
+      "name": "AI综合新闻",
+      "query": "AI artificial intelligence news today",
+      "enabled": true,
+      "icon": "🤖"
+    },
+    {
+      "id": "llm_news",
+      "name": "大语言模型",
+      "query": "LLM large language model ChatGPT Claude news",
+      "enabled": true,
+      "icon": "💬"
+    },
+    {
+      "id": "ai_tools",
+      "name": "AI工具动态",
+      "query": "AI tools productivity automation news",
+      "enabled": true,
+      "icon": "🛠️"
+    },
+    {
+      "id": "ai_research",
+      "name": "AI研究进展",
+      "query": "AI research breakthrough paper",
+      "enabled": false,
+      "icon": "🔬"
+    }
+  ],
+  "settings": {
+    "results_per_source": 3,
+    "translate_titles": true,
+    "generate_summary": true,
+    "language": "zh-CN"
+  }
+}
