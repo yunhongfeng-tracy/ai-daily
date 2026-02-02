@@ -7,8 +7,9 @@ set -e
 
 REPO_DIR="/root/.openclaw/workspace/ai-daily"
 TODAY=$(date +%Y-%m-%d)
+# Token配置（cron环境变量可能不生效，使用默认值）
 BRAVE_API_KEY="${BRAVE_API_KEY:-BSABJykguZY7fMv9-C0etQUd4zEs1Yt}"
-GITHUB_TOKEN="${GITHUB_TOKEN}"
+GITHUB_TOKEN="${GITHUB_TOKEN:-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}"
 
 echo "🤖 AI Daily Generator - ${TODAY}"
 cd "$REPO_DIR"
