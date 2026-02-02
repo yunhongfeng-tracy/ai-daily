@@ -1,0 +1,60 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-02-02T00:00:00Z",
+  "global_settings": {
+    "max_news_per_source": 3,
+    "total_news_limit": 10,
+    "translate_to_chinese": true
+  },
+  "sources": [
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "type": "brave_api",
+      "enabled": true,
+      "priority": 1,
+      "config": {
+        "query": "AI artificial intelligence news today",
+        "count": 5
+      }
+    },
+    {
+      "id": "techcrunch-ai",
+      "name": "TechCrunch AI",
+      "type": "rss",
+      "enabled": false,
+      "priority": 2,
+      "config": {
+        "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "max_items": 3
+      }
+    },
+    {
+      "id": "mit-news",
+      "name": "MIT AI News",
+      "type": "rss",
+      "enabled": false,
+      "priority": 3,
+      "config": {
+        "url": "https://news.mit.edu/topic/artificial-intelligence2/feed",
+        "max_items": 2
+      }
+    },
+    {
+      "id": "openai-blog",
+      "name": "OpenAI Blog",
+      "type": "rss",
+      "enabled": false,
+      "priority": 4,
+      "config": {
+        "url": "https://openai.com/blog/rss.xml",
+        "max_items": 2
+      }
+    }
+  ],
+  "filters": {
+    "exclude_domains": [],
+    "required_keywords": [],
+    "exclude_keywords": ["sponsored", "advertisement"]
+  }
+}

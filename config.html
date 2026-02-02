@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Daily - 配置中心</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            color: #1d1d1f;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .header p { color: #86868b; font-size: 1rem; }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #515154;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e8e8ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #0066cc;
+        }
+
+        .source-item {
+            background: #f9f9fb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        .source-item.disabled {
+            opacity: 0.6;
+        }
+        .source-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .source-name {
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        .source-type {
+            font-size: 0.8rem;
+            color: #86868b;
+            background: #e8e8ed;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e8e8ed;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #34c759;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-primary {
+            background: #0066cc;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0055b3;
+        }
+        .btn-secondary {
+            background: #e8e8ed;
+            color: #1d1d1f;
+        }
+        .btn-secondary:hover {
+            background: #d1d1d6;
+        }
+        .btn-danger {
+            background: #ff3b30;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #d63029;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .alert-info {
+            background: #e7f3ff;
+            color: #0066cc;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 24px;
+            color: #515154;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .back-link:hover { color: #1d1d1f; }
+
+        .add-source-btn {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed #e8e8ed;
+            border-radius: 12px;
+            background: transparent;
+            color: #86868b;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        .add-source-btn:hover {
+            border-color: #0066cc;
+            color: #0066cc;
+        }
+
+        .inline-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        @media (max-width: 600px) {
+            .inline-form { grid-template-columns: 1fr; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #86868b;
+            font-size: 0.85rem;
+        }
+        footer a { color: #0066cc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./index.html" class="back-link">← 返回首页</a>
+
+        <div class="header">
+            <h1>AI Daily 配置中心</h1>
+            <p>管理新闻来源和全局设置</p>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <!-- GitHub 认证 -->
+        <div class="card" id="auth-card">
+            <h2>GitHub 认证</h2>
+            <p style="color: #86868b; font-size: 0.9rem; margin-bottom: 16px;">
+                需要 GitHub Personal Access Token 来保存配置。
+                <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">创建 Token</a>
+            </p>
+            <div class="form-group">
+                <label>GitHub Token</label>
+                <input type="password" id="github-token" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <button class="btn btn-primary" onclick="authenticate()">验证并加载配置</button>
+        </div>
+
+        <!-- 配置面板（认证后显示） -->
+        <div id="config-panel" style="display: none;">
+
+            <!-- 全局设置 -->
+            <div class="card">
+                <h2>全局设置</h2>
+                <div class="inline-form">
+                    <div class="form-group">
+                        <label>每个来源最大新闻数</label>
+                        <input type="number" id="max-per-source" min="1" max="10" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label>总新闻数量上限</label>
+                        <input type="number" id="total-limit" min="1" max="20" value="10">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 8px;">
+                    <label style="display: flex; align-items: center; gap: 12px;">
+                        <span>翻译为中文</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="translate-zh" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 新闻来源 -->
+            <div class="card">
+                <h2>新闻来源</h2>
+                <div id="sources-list"></div>
+                <button class="add-source-btn" onclick="addNewSource()">+ 添加新来源</button>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveConfig()">保存配置</button>
+                <button class="btn btn-secondary" onclick="loadConfig()">重新加载</button>
+            </div>
+        </div>
+
+        <footer>
+            AI Daily 配置中心 | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
+        </footer>
+    </div>
+
+    <script>
+        const REPO = 'yunhongfeng-tracy/ai-daily';
+        const CONFIG_PATH = 'sources.json';
+        let githubToken = '';
+        let currentConfig = null;
+        let fileSha = '';
+
+        // 显示提示
+        function showAlert(message, type = 'info') {
+            const container = document.getElementById('alert-container');
+            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        // GitHub API 认证
+        async function authenticate() {
+            githubToken = document.getElementById('github-token').value.trim();
+            if (!githubToken) {
+                showAlert('请输入 GitHub Token', 'error');
+                return;
+            }
+
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${REPO}`, {
+                    headers: { 'Authorization': `token ${githubToken}` }
+                });
+
+                if (!resp.ok) throw new Error('认证失败');
+
+                localStorage.setItem('github_token', githubToken);
+                showAlert('认证成功！', 'success');
+                document.getElementById('auth-card').style.display = 'none';
+                document.getElementById('config-panel').style.display = 'block';
+                loadConfig();
+            } catch (e) {
+                showAlert('认证失败，请检查 Token', 'error');
+            }
+        }
+
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${CONFIG_PATH}`, {
+                    headers: { 'Authorization': `token ${githubToken}` }
+                });
+
+                if (!resp.ok) throw new Error('加载失败');
+
+                const data = await resp.json();
+                fileSha = data.sha;
+                currentConfig = JSON.parse(atob(data.content));
+
+                renderConfig();
+                showAlert('配置加载成功', 'success');
+            } catch (e) {
+                showAlert('加载配置失败: ' + e.message, 'error');
+            }
+        }
+
+        // 渲染配置
+        function renderConfig() {
+            if (!currentConfig) return;
+
+            // 全局设置
+            const settings = currentConfig.global_settings || {};
+            document.getElementById('max-per-source').value = settings.max_news_per_source || 3;
+            document.getElementById('total-limit').value = settings.total_news_limit || 10;
+            document.getElementById('translate-zh').checked = settings.translate_to_chinese !== false;
+
+            // 新闻来源
+            renderSources();
+        }
+
+        // 渲染来源列表
+        function renderSources() {
+            const container = document.getElementById('sources-list');
+            const sources = currentConfig.sources || [];
+
+            container.innerHTML = sources.map((source, index) => `
+                <div class="source-item ${source.enabled ? '' : 'disabled'}">
+                    <div class="source-header">
+                        <div>
+                            <span class="source-name">${source.name}</span>
+                            <span class="source-type">${source.type}</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" ${source.enabled ? 'checked' : ''}
+                                   onchange="toggleSource(${index}, this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="inline-form">
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input type="text" value="${source.name}"
+                                   onchange="updateSource(${index}, 'name', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>优先级 (1最高)</label>
+                            <input type="number" value="${source.priority || 1}" min="1" max="99"
+                                   onchange="updateSource(${index}, 'priority', parseInt(this.value))">
+                        </div>
+                    </div>
+                    ${source.type === 'brave_api' ? `
+                        <div class="form-group">
+                            <label>搜索关键词</label>
+                            <input type="text" value="${source.config?.query || ''}"
+                                   onchange="updateSourceConfig(${index}, 'query', this.value)">
+                        </div>
+                    ` : ''}
+                    ${source.type === 'rss' ? `
+                        <div class="form-group">
+                            <label>RSS URL</label>
+                            <input type="text" value="${source.config?.url || ''}"
+                                   onchange="updateSourceConfig(${index}, 'url', this.value)">
+                        </div>
+                    ` : ''}
+                    <button class="btn btn-danger" style="margin-top: 8px;"
+                            onclick="removeSource(${index})">删除</button>
+                </div>
+            `).join('');
+        }
+
+        // 切换来源启用状态
+        function toggleSource(index, enabled) {
+            currentConfig.sources[index].enabled = enabled;
+            renderSources();
+        }
+
+        // 更新来源属性
+        function updateSource(index, key, value) {
+            currentConfig.sources[index][key] = value;
+        }
+
+        // 更新来源配置
+        function updateSourceConfig(index, key, value) {
+            if (!currentConfig.sources[index].config) {
+                currentConfig.sources[index].config = {};
+            }
+            currentConfig.sources[index].config[key] = value;
+        }
+
+        // 删除来源
+        function removeSource(index) {
+            if (confirm('确定要删除这个来源吗？')) {
+                currentConfig.sources.splice(index, 1);
+                renderSources();
+            }
+        }
+
+        // 添加新来源
+        function addNewSource() {
+            const type = prompt('选择来源类型:\n1. brave_api (Brave搜索)\n2. rss (RSS订阅)\n\n请输入 1 或 2:');
+
+            if (type === '1') {
+                currentConfig.sources.push({
+                    id: 'brave-' + Date.now(),
+                    name: '新 Brave 搜索',
+                    type: 'brave_api',
+                    enabled: true,
+                    priority: currentConfig.sources.length + 1,
+                    config: { query: 'AI news', count: 5 }
+                });
+            } else if (type === '2') {
+                currentConfig.sources.push({
+                    id: 'rss-' + Date.now(),
+                    name: '新 RSS 订阅',
+                    type: 'rss',
+                    enabled: true,
+                    priority: currentConfig.sources.length + 1,
+                    config: { url: '', max_items: 3 }
+                });
+            } else {
+                return;
+            }
+
+            renderSources();
+        }
+
+        // 保存配置
+        async function saveConfig() {
+            // 更新全局设置
+            currentConfig.global_settings = {
+                max_news_per_source: parseInt(document.getElementById('max-per-source').value) || 3,
+                total_news_limit: parseInt(document.getElementById('total-limit').value) || 10,
+                translate_to_chinese: document.getElementById('translate-zh').checked
+            };
+
+            currentConfig.updated_at = new Date().toISOString();
+
+            try {
+                const resp = await fetch(`https://api.github.com/repos/${REPO}/contents/${CONFIG_PATH}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: '更新新闻来源配置',
+                        content: btoa(unescape(encodeURIComponent(JSON.stringify(currentConfig, null, 2)))),
+                        sha: fileSha
+                    })
+                });
+
+                if (!resp.ok) throw new Error('保存失败');
+
+                const data = await resp.json();
+                fileSha = data.content.sha;
+                showAlert('配置保存成功！', 'success');
+            } catch (e) {
+                showAlert('保存失败: ' + e.message, 'error');
+            }
+        }
+
+        // 页面加载时检查本地存储的 token
+        window.onload = function() {
+            const savedToken = localStorage.getItem('github_token');
+            if (savedToken) {
+                document.getElementById('github-token').value = savedToken;
+            }
+        };
+    </script>
+</body>
+</html>
