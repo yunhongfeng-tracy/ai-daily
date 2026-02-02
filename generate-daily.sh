@@ -169,8 +169,13 @@ fi
 python3 convert.py
 echo "✓ 生成HTML页面"
 
-# 8. 提交并推送
-if [ -n "$GITHUB_TOKEN" ]; then
+# 8. 设置Git远程（使用token）
+GIT_TOKEN="${GITHUB_TOKEN}"
+if [ -n "$GIT_TOKEN" ]; then
+    # 更新remote URL以包含token
+    git remote set-url origin "https://${GIT_TOKEN}@github.com/yunhongfeng-tracy/ai-daily.git" 2>/dev/null || \
+    git remote add origin "https://${GIT_TOKEN}@github.com/yunhongfeng-tracy/ai-daily.git"
+    
     git config user.name "tracy-bot" 2>/dev/null || true
     git config user.email "bot@tracy.ai" 2>/dev/null || true
     
@@ -184,7 +189,7 @@ if [ -n "$GITHUB_TOKEN" ]; then
         echo "✓ 无新内容，跳过提交"
     fi
 else
-    echo "⚠️ 未设置GITHUB_TOKEN"
+    echo "⚠️ 未设置GITHUB_TOKEN，跳过推送"
 fi
 
 echo ""
