@@ -14,7 +14,7 @@ CSS = """
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f5f5f7;
+    background: #f0ebe4;
     min-height: 100vh;
     padding: 40px 20px;
 }
@@ -25,18 +25,19 @@ body {
 }
 .logo h1 {
     font-size: 2rem;
-    color: #1d1d1f;
+    color: #2c4a5a;
     font-weight: 700;
     margin-bottom: 8px;
     letter-spacing: -0.5px;
 }
-.logo p { color: #86868b; font-size: 1rem; }
+.logo h1 span { color: #d4893a; }
+.logo p { color: #6b7f8a; font-size: 1rem; }
 
 /* 归档列表 */
 .archive-list {
-    background: white;
+    background: #ffffff;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
     overflow: hidden;
 }
 .archive-item {
@@ -45,58 +46,70 @@ body {
     padding: 18px 20px;
     text-decoration: none;
     color: inherit;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #e8e2d8;
     transition: all 0.2s ease;
 }
 .archive-item:last-child { border-bottom: none; }
-.archive-item:hover { background: #fafafa; }
+.archive-item:hover { background: #faf7f2; }
 .archive-date {
     font-size: 0.8rem;
-    color: #86868b;
+    color: #6b7f8a;
     min-width: 90px;
 }
 .archive-title {
     flex: 1;
     font-size: 1rem;
-    color: #1d1d1f;
+    color: #2c4a5a;
     font-weight: 500;
 }
 .archive-arrow {
-    color: #86868b;
+    color: #d4893a;
     font-size: 1rem;
     transition: transform 0.2s;
 }
-.archive-item:hover .archive-arrow { transform: translateX(3px); color: #1d1d1f; }
+.archive-item:hover .archive-arrow { transform: translateX(3px); }
 footer {
     text-align: center;
     margin-top: 40px;
-    color: #86868b;
+    color: #6b7f8a;
     font-size: 0.85rem;
 }
+footer a { color: #d4893a !important; }
 
 /* 当日页面样式 */
 .day-page {
-    background: white;
+    background: #ffffff;
     border-radius: 20px;
-    box-shadow: 0 4px 30px rgba(0,0,0,0.04);
+    box-shadow: 0 4px 30px rgba(44,74,90,0.08);
     overflow: hidden;
     max-width: 100%;
     margin: 0 auto;
 }
 .day-header {
-    background: #1d1d1f;
+    background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%);
     padding: 40px;
     color: white;
+    position: relative;
+}
+.day-header::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(212,137,58,0.15);
 }
 .day-header h1 {
     font-size: 2.2rem;
     margin-bottom: 8px;
     font-weight: 700;
     letter-spacing: -0.5px;
+    position: relative;
 }
 .day-header .date {
-    opacity: 0.6;
+    opacity: 0.75;
     font-size: 1rem;
+    position: relative;
 }
 .day-content { padding: 32px 40px; }
 
@@ -112,26 +125,29 @@ footer {
 }
 .section-title {
     font-size: 1.4rem;
-    color: #1d1d1f;
+    color: #2c4a5a;
     margin: 40px 0 24px;
     font-weight: 700;
     letter-spacing: -0.3px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d4893a;
+    display: inline-block;
 }
 
-/* 新闻卡片 - Apple风格 */
+/* 新闻卡片 */
 .card {
     background: #fff;
     border-radius: 16px;
     padding: 0;
-    border: 1px solid #e8e8ed;
+    border: 1px solid #e8e2d8;
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
 }
 .card:hover {
-    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
-    transform: translateY(-4px);
-    border-color: transparent;
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
 }
 .card-content {
     padding: 24px;
@@ -141,7 +157,7 @@ footer {
 }
 .card h3 {
     font-size: 1.1rem;
-    color: #1d1d1f;
+    color: #2c4a5a;
     margin-bottom: 10px;
     font-weight: 600;
     letter-spacing: -0.2px;
@@ -149,36 +165,34 @@ footer {
 }
 .card .source {
     font-size: 0.8rem;
-    color: #86868b;
+    color: #6b7f8a;
     margin-bottom: 12px;
 }
 .card .source a {
-    color: #0066cc;
+    color: #d4893a;
     text-decoration: none;
+    font-weight: 500;
 }
 .card .source a:hover { text-decoration: underline; }
 .card p {
     font-size: 0.95rem;
-    color: #515154;
+    color: #4a5e6a;
     line-height: 1.6;
     margin-bottom: 16px;
     flex: 1;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
 }
 .card .read-more {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 0.9rem;
-    color: #0066cc;
+    color: #3d5a6e;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     margin-top: auto;
+    transition: color 0.2s, gap 0.2s;
 }
-.card .read-more:hover { text-decoration: underline; }
+.card .read-more:hover { color: #d4893a; gap: 10px; }
 
 /* 工具卡片网格 */
 .tools-grid {
@@ -194,15 +208,15 @@ footer {
     background: #fff;
     border-radius: 16px;
     padding: 20px;
-    border: 1px solid #e8e8ed;
+    border: 1px solid #e8e2d8;
     transition: all 0.25s ease;
     display: flex;
     flex-direction: column;
 }
 .tool-card:hover {
-    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
-    transform: translateY(-4px);
-    border-color: transparent;
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
 }
 .tool-header {
     display: flex;
@@ -220,23 +234,23 @@ footer {
     font-size: 1.3rem;
     flex-shrink: 0;
 }
-.tool-icon.purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.tool-icon.blue { background: linear-gradient(135deg, #0066cc 0%, #5ac8fa 100%); }
-.tool-icon.green { background: linear-gradient(135deg, #34c759 0%, #30d158 100%); }
-.tool-icon.orange { background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); }
-.tool-icon.pink { background: linear-gradient(135deg, #ff2d55 0%, #ff6b9d 100%); }
-.tool-icon.teal { background: linear-gradient(135deg, #5ac8fa 0%, #64d2ff 100%); }
+.tool-icon.purple { background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%); }
+.tool-icon.blue { background: linear-gradient(135deg, #4a7c8a 0%, #3d5a6e 100%); }
+.tool-icon.green { background: linear-gradient(135deg, #5a9a6e 0%, #3d7a58 100%); }
+.tool-icon.orange { background: linear-gradient(135deg, #d4893a 0%, #b86e2a 100%); }
+.tool-icon.pink { background: linear-gradient(135deg, #c45a6e 0%, #a84055 100%); }
+.tool-icon.teal { background: linear-gradient(135deg, #4a8a9a 0%, #3d6e7a 100%); }
 .tool-info { flex: 1; min-width: 0; }
 .tool-name {
     font-size: 1rem;
     font-weight: 600;
-    color: #1d1d1f;
+    color: #2c4a5a;
     margin-bottom: 4px;
     line-height: 1.3;
 }
 .tool-desc {
     font-size: 0.85rem;
-    color: #6e6e73;
+    color: #6b7f8a;
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -249,18 +263,18 @@ footer {
     justify-content: center;
     gap: 4px;
     background: transparent;
-    color: #0066cc;
+    color: #d4893a;
     padding: 8px 16px;
     border-radius: 8px;
-    border: 1.5px solid #0066cc;
+    border: 1.5px solid #d4893a;
     text-decoration: none;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
     margin-top: auto;
     transition: all 0.2s;
 }
 .tool-link:hover {
-    background: #0066cc;
+    background: #d4893a;
     color: white;
 }
 .back-link {
@@ -268,12 +282,13 @@ footer {
     align-items: center;
     gap: 6px;
     margin-bottom: 24px;
-    color: #515154;
+    color: #3d5a6e;
     text-decoration: none;
     font-size: 0.95rem;
+    font-weight: 500;
     transition: color 0.2s;
 }
-.back-link:hover { color: #1d1d1f; }
+.back-link:hover { color: #d4893a; }
 </style>
 """
 
@@ -345,7 +360,7 @@ def generate_index_html():
     <a href="./index.html" class="back-link" style="display:none;">← 返回首页</a>
     <div class="container">
         <div class="logo">
-            <h1>🤖 AI Daily</h1>
+            <h1>AI <span>Daily</span></h1>
             <p>每日AI新闻与工具推荐精选</p>
         </div>
         
@@ -354,12 +369,12 @@ def generate_index_html():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
         </footer>
     </div>
 </body>
 </html>"""
-    
+
     with open('index.html', 'w', encoding='utf-8') as f:
         f.write(html)
     print(f"✓ 生成首页: index.html")
@@ -413,17 +428,16 @@ def generate_daily_pages():
         # 处理新闻卡片
         news_cards = []
         def replace_news(match):
-            title = match.group(1)
+            news_title = match.group(1)
             source_link = match.group(2)
             source_name = match.group(3)
-            source_date = match.group(4)
-            summary = match.group(5)
-            read_link = match.group(6)
+            summary = match.group(4)
+            read_link = match.group(5)
 
             card = f'''<div class="card">
     <div class="card-content">
-        <h3>{title}</h3>
-        <div class="source"><a href="{source_link}">{source_name}</a> · {source_date}</div>
+        <h3>{news_title}</h3>
+        <p class="source">来源: <a href="{source_link}">{source_name}</a></p>
         <p>{summary}</p>
         <a href="{read_link}" class="read-more" target="_blank">阅读原文 →</a>
     </div>
@@ -431,9 +445,9 @@ def generate_daily_pages():
             news_cards.append(card)
             return '<!--NEWS_PLACEHOLDER-->'
 
-        # 转换新闻格式: <h3>标题</h3><p>来源: <a>...</a> · 日期</p><p>摘要</p><p><a>阅读原文</a></p>
+        # 转换新闻格式: <h3>标题</h3><p>来源: <a href="url">名称</a></p><p>摘要</p><p><a href="url">阅读原文</a></p>
         html_content = re.sub(
-            r'<h3>([^<]+)</h3>\s*<p>来源:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a>\s*·\s*([^<]+)</p>\s*<p>([^<]+)</p>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
+            r'<h3>([^<]+)</h3>\s*<p>来源:\s*<a[^>]*href="([^"]*)"[^>]*>([^<]+)</a></p>\s*<p>([^<]+)</p>\s*<p><a[^>]*href="([^"]*)"[^>]*>阅读原文</a></p>\s*(?:<hr\s*/?>)?',
             replace_news,
             html_content,
             flags=re.DOTALL
@@ -483,6 +497,9 @@ def generate_daily_pages():
 
         # 清理多余的 <hr> 标签
         html_content = re.sub(r'<hr\s*/?>', '', html_content)
+
+        # 给 <h2> 段落标题加 section-title 类
+        html_content = re.sub(r'<h2>', '<h2 class="section-title">', html_content)
         
         html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -507,12 +524,12 @@ def generate_daily_pages():
         </div>
         
         <footer>
-            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
         </footer>
     </div>
 </body>
 </html>"""
-        
+
         os.makedirs('daily', exist_ok=True)
         with open(f'daily/{f.replace(".md", ".html")}', 'w', encoding='utf-8') as file:
             file.write(html)
