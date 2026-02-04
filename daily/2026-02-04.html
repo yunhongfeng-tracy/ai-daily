@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Daily · 2026-02-04</title>
+    
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f5f5f7;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.logo h1 {
+    font-size: 2rem;
+    color: #1d1d1f;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+.logo p { color: #86868b; font-size: 1rem; }
+
+/* 归档列表 */
+.archive-list {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+.archive-item {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
+}
+.archive-item:last-child { border-bottom: none; }
+.archive-item:hover { background: #fafafa; }
+.archive-date {
+    font-size: 0.8rem;
+    color: #86868b;
+    min-width: 90px;
+}
+.archive-title {
+    flex: 1;
+    font-size: 1rem;
+    color: #1d1d1f;
+    font-weight: 500;
+}
+.archive-arrow {
+    color: #86868b;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+.archive-item:hover .archive-arrow { transform: translateX(3px); color: #1d1d1f; }
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #86868b;
+    font-size: 0.85rem;
+}
+
+/* 当日页面样式 */
+.day-page {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.04);
+    overflow: hidden;
+    max-width: 100%;
+    margin: 0 auto;
+}
+.day-header {
+    background: #1d1d1f;
+    padding: 40px;
+    color: white;
+}
+.day-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+.day-header .date {
+    opacity: 0.6;
+    font-size: 1rem;
+}
+.day-content { padding: 32px 40px; }
+
+/* 新闻网格布局 */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .news-grid { grid-template-columns: 1fr; }
+}
+.section-title {
+    font-size: 1.4rem;
+    color: #1d1d1f;
+    margin: 40px 0 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* 新闻卡片 - Apple风格 */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid #e8e8ed;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    border-color: transparent;
+}
+.card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.card h3 {
+    font-size: 1.1rem;
+    color: #1d1d1f;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    line-height: 1.4;
+}
+.card .source {
+    font-size: 0.8rem;
+    color: #86868b;
+    margin-bottom: 12px;
+}
+.card .source a {
+    color: #0066cc;
+    text-decoration: none;
+}
+.card .source a:hover { text-decoration: underline; }
+.card p {
+    font-size: 0.95rem;
+    color: #515154;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.card .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 500;
+    margin-top: auto;
+}
+.card .read-more:hover { text-decoration: underline; }
+
+/* 工具卡片网格 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+@media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+}
+.tool-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e8e8ed;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.tool-card:hover {
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    transform: translateY(-4px);
+    border-color: transparent;
+}
+.tool-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.tool-icon.purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.tool-icon.blue { background: linear-gradient(135deg, #0066cc 0%, #5ac8fa 100%); }
+.tool-icon.green { background: linear-gradient(135deg, #34c759 0%, #30d158 100%); }
+.tool-icon.orange { background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); }
+.tool-icon.pink { background: linear-gradient(135deg, #ff2d55 0%, #ff6b9d 100%); }
+.tool-icon.teal { background: linear-gradient(135deg, #5ac8fa 0%, #64d2ff 100%); }
+.tool-info { flex: 1; min-width: 0; }
+.tool-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+.tool-desc {
+    font-size: 0.85rem;
+    color: #6e6e73;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.tool-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    color: #0066cc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #0066cc;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: auto;
+    transition: all 0.2s;
+}
+.tool-link:hover {
+    background: #0066cc;
+    color: white;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #515154;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #1d1d1f; }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="day-page">
+            <div class="day-header">
+                <h1>AI Daily · 2026-02-04</h1>
+                <p class="date">2026年02月04日 08:30</p>
+            </div>
+            <div class="day-content">
+                
+
+<h2>📰 今日新闻</h2>
+<h3>AI新闻 | 最新动态 | 洞察力驱动AI业务增长</h3>
+<p>来源: <a href="https://www.artificialintelligence-news.com/">AI新闻</a></p>
+<p>零售与物流人工智能 · 2026年1月12日 · 人工智能 · 2026年1月12日 ·</p>
+<p><a href="https://www.artificialintelligence-news.com/">阅读原文</a></p>
+
+<h3>路透社人工智能新闻 | 最新头条与发展动态 | 路透社</h3>
+<p>来源: <a href="https://www.reuters.com/technology/artificial-intelligence/">路透社</a></p>
+<p>独家新闻、数据与分析……在美国国防开支推动下实现创纪录季度业绩后·帕兰蒂尔科技公司股价周二早盘大涨6.9%，投资者看好其军用级人工智能工具及……</p>
+<p><a href="https://www.reuters.com/technology/artificial-intelligence/">阅读原文</a></p>
+
+<h3>AI新闻与人工智能 | TechCrunch</h3>
+<p>来源: <a href="https://techcrunch.com/category/artificial-intelligence/">TechCrunch</a></p>
+<p>人工智能与机器学习技术新闻报道，涵盖相关企业构建及当前AI引发的伦理议题。</p>
+<p><a href="https://techcrunch.com/category/artificial-intelligence/">阅读原文</a></p>
+
+<h3>人工智能 | 麻省理工学院新闻 | 麻省理工学院</h3>
+<p>来源: <a href="https://news.mit.edu/topic/artificial-intelligence2">麻省理工</a></p>
+<p>随着人工智能技术的进步，一门新的跨学科课程旨在培养学生计算领域的基础批判性思维能力。……新研究检测出错误关联的隐藏证据，并提供提高准确性的方法。……在西格尔家族基金会的支持下……</p>
+<p><a href="https://news.mit.edu/topic/artificial-intelligence2">阅读原文</a></p>
+
+<h3>人工智能 | 《卫报》</h3>
+<p>来源: <a href="https://www.theguardian.com/technology/artificialintelligenceai">Theguardian</a></p>
+<p>面对面交流打破东伦敦隔阂，人工智能初创企业亦致力弥合沟通鸿沟</p>
+<p><a href="https://www.theguardian.com/technology/artificialintelligenceai">阅读原文</a></p>
+
+<h2>🛠️ 工具推荐</h2>
+<div class="tools-grid">
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon purple">🎨</div>
+        <div class="tool-info">
+            <div class="tool-name">v0.dev - AI UI生成器</div>
+            <div class="tool-desc">由Vercel推出的AI界面生成器，只需描述需求即可自动生成React/Tailwind组件。</div>
+        </div>
+    </div>
+    <a href="https://v0.app" class="tool-link" target="_blank">访问 →</a>
+</div>
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon blue">💻</div>
+        <div class="tool-info">
+            <div class="tool-name">Cursor - AI代码编辑器</div>
+            <div class="tool-desc">专为AI辅助编程设计的IDE，基于VS Code，支持智能代码补全和重构建议。</div>
+        </div>
+    </div>
+    <a href="https://cursor.com" class="tool-link" target="_blank">访问 →</a>
+</div>
+<div class="tool-card">
+    <div class="tool-header">
+        <div class="tool-icon teal">🔍</div>
+        <div class="tool-info">
+            <div class="tool-name">Perplexity - AI搜索引擎</div>
+            <div class="tool-desc">结合大语言模型的搜索引擎，提供带有引用来源的答案，支持多种语言。</div>
+        </div>
+    </div>
+    <a href="https://www.perplexity.ai" class="tool-link" target="_blank">访问 →</a>
+</div>
+</div>
+
+
+<h2>📚 归档</h2>
+<ul>
+<li><a href="./2026-02-04.html">2026-02-04</a></li>
+</ul>
+            </div>
+        </div>
+        
+        <footer>
+            Powered by OpenClaw 🤗 | <a href="https://github.com/yunhongfeng-tracy/ai-daily" style="color:#0066cc;">GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>
