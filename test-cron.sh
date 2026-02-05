@@ -17,15 +17,17 @@ echo "工作目录: $REPO_DIR" >> "$LOG_FILE"
 # 进入目录
 cd "$REPO_DIR"
 
-# 设置环境变量（确保cron能读取）
-export DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-sk-7bc8f2dcf1734756bd81c55af2413f80}"
-export BRAVE_API_KEY="${BRAVE_API_KEY:-BSABJykguZY7fMv9-C0etQUd4zEs1Yt}"
-export GITHUB_TOKEN="${GITHUB_TOKEN:-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}"
+# Load secrets (cron has a minimal env)
+source /root/.openclaw/workspace/.secrets/credentials.env
+export DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:?missing DEEPSEEK_API_KEY}"
+export BRAVE_API_KEY="${BRAVE_API_KEY:?missing BRAVE_API_KEY}"
+export GITHUB_TOKEN="${GITHUB_TOKEN:?missing GITHUB_TOKEN}"
 
+# 只记录是否存在，不写入任何前缀/片段
 echo "环境变量检查:" >> "$LOG_FILE"
-echo "  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:0:10}..." >> "$LOG_FILE"
-echo "  BRAVE_API_KEY: ${BRAVE_API_KEY:0:10}..." >> "$LOG_FILE"
-echo "  GITHUB_TOKEN: ${GITHUB_TOKEN:0:10}..." >> "$LOG_FILE"
+echo "  DEEPSEEK_API_KEY: [set]" >> "$LOG_FILE"
+echo "  BRAVE_API_KEY: [set]" >> "$LOG_FILE"
+echo "  GITHUB_TOKEN: [set]" >> "$LOG_FILE"
 
 # 运行Python脚本
 echo "运行 generate-daily.py..." >> "$LOG_FILE"

@@ -15,8 +15,27 @@ from urllib.parse import urlparse
 REPO_DIR = "/root/.openclaw/workspace/ai-daily"
 TODAY = datetime.now().strftime('%Y-%m-%d')
 NOW = datetime.now().strftime('%Y-%m-%d %H:%M')
-DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY', 'sk-7bc8f2dcf1734756bd81c55af2413f80')
+def _load_env_from_secrets():
+    p = "/root/.openclaw/workspace/.secrets/credentials.env"
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or not line.startswith("export "):
+                    continue
+                k, v = line[len("export "):].split("=", 1)
+                v = v.strip().strip("'\"")
+                os.environ.setdefault(k.strip(), v)
+    except Exception:
+        pass
+
+_load_env_from_secrets()
+
+DEEPSEEK_API_KEY = os.environ.get('DEEPSEEK_API_KEY')
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN')
+if not DEEPSEEK_API_KEY:
+    print("⚠️ DEEPSEEK_API_KEY not set; translations may fail")
+
 
 # DeepSeek翻译函数
 def translate_with_deepseek(text):
@@ -134,7 +153,10 @@ def search_news():
     print(f"🤖 AI Daily Generator - {TODAY}")
     print("📰 搜索AI新闻...")
     
-    BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY', 'BSABJykguZY7fMv9-C0etQUd4zEs1Yt')
+    BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY')
+    if not BRAVE_API_KEY:
+        print("搜索失败: BRAVE_API_KEY not set")
+        return None
     url = f"https://api.search.brave.com/res/v1/web/search?q=AI+artificial+intelligence+news+today&count=8"
     req = urllib.request.Request(url, headers={
         'Accept': 'application/json',
