@@ -354,6 +354,15 @@ def search_news():
         return data
 
     except Exception as e:
+        # Try to print response body for HTTPError (useful for 422 debugging)
+        try:
+            from urllib import error as urllib_error
+            if isinstance(e, urllib_error.HTTPError):
+                body = e.read().decode('utf-8', errors='ignore')
+                print(f"搜索失败: HTTP {e.code} {e.reason}; body: {body[:300]}")
+                return None
+        except Exception:
+            pass
         print(f"搜索失败: {e}")
         return None
 
