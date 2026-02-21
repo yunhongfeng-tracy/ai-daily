@@ -295,7 +295,7 @@ def search_news():
         return None
 
     # Freshness: past day, count higher then filter locally.
-    q = "(OpenAI OR Anthropic OR Google OR Microsoft OR NVIDIA OR DeepSeek OR Qwen OR Gemini OR Claude) AI news"
+    q = "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news"
     url = (
         "https://api.search.brave.com/res/v1/web/search?"
         + "q=" + urllib.parse.quote(q)
