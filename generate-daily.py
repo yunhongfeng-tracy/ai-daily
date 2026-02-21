@@ -571,6 +571,9 @@ def search_tools():
         "substack.com",
         "dev.to",
         "discuss.huggingface.co",
+        # rumor / low-signal sites
+        "llmrumors.com",
+        "www.llmrumors.com",
         # download farms / aggregators
         "uptodown.com", "ollama.en.uptodown.com",
         # generic social
