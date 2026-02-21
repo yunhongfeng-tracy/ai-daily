@@ -632,6 +632,50 @@ def search_tools():
         # For 'direct entry' mode, reject unknown hosts.
         return False
 
+    def _extract_direct_entries_from_html(html: str):
+        """Return list of direct entry URLs found in an article page."""
+        if not html:
+            return []
+        urls = []
+        patterns = [
+            r"https?://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+            r"https?://pypi\.org/project/[A-Za-z0-9_.-]+/?",
+            r"https?://www\.npmjs\.com/package/[A-Za-z0-9_.@/-]+",
+            r"https?://huggingface\.co/spaces/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+            r"https?://huggingface\.co/models/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+        ]
+        for pat in patterns:
+            for m in re.findall(pat, html):
+                urls.append(m.rstrip("/"))
+        # de-dupe keep order
+        out = []
+        seen_u = set()
+        for u in urls:
+            if u not in seen_u:
+                seen_u.add(u)
+                out.append(u)
+        return out
+
+    def _try_resolve_to_direct_entry(url_i: str):
+        """If url_i is not a direct entry, try to fetch and extract a direct-entry link."""
+        try:
+            req2 = urllib.request.Request(url_i, headers={
+                "User-Agent": "Mozilla/5.0",
+                "Accept": "text/html,application/xhtml+xml",
+            })
+            with urllib.request.urlopen(req2, timeout=15) as resp2:
+                ctype = resp2.headers.get("Content-Type", "")
+                if "text/html" not in ctype:
+                    return None
+                html = resp2.read(600000).decode("utf-8", errors="ignore")
+            candidates = _extract_direct_entries_from_html(html)
+            for c in candidates:
+                if looks_like_tool_artifact(c):
+                    return c
+        except Exception:
+            return None
+        return None
+
     picked = []
     seen = set()
 
@@ -654,6 +698,9 @@ def search_tools():
         except Exception:
             continue
 
+        # limit how many pages we fetch for resolving (avoid being slow)
+        resolve_budget = 3
+
         for item in (data.get('web', {}) or {}).get('results', []):
             title = clean_text(item.get('title', ''))
             url_i = item.get('url', '')
@@ -673,16 +720,23 @@ def search_tools():
                 continue
             if is_bad_tool_page(url_i, title, desc):
                 continue
-            if not looks_like_tool_artifact(url_i):
+
+            direct_url = url_i if looks_like_tool_artifact(url_i) else None
+            if not direct_url and resolve_budget > 0:
+                resolve_budget -= 1
+                direct_url = _try_resolve_to_direct_entry(url_i)
+
+            if not direct_url:
+                continue
+            if direct_url in recent:
                 continue
 
             # cheap de-dupe
-            key = (re.sub(r"\W+", "", title.lower())[:90], host)
+            key = (direct_url,)
             if key in seen:
                 continue
             seen.add(key)
 
-            # date from page_age when possible
             date = None
             dt = _parse_iso_dt(item.get("page_age"))
             if dt:
@@ -690,7 +744,7 @@ def search_tools():
 
             picked.append({
                 "name": title,
-                "url": url_i,
+                "url": direct_url,
                 "desc": desc,
                 "source": get_source_name(url_i),
                 "date": date,
