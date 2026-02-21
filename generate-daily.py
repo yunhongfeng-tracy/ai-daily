@@ -343,6 +343,7 @@ def search_news():
     queries = [
         "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news",
         "AI model released benchmark safety regulation funding NVIDIA chip",
+        "EU US AI regulation policy lawsuit copyright OpenAI Anthropic",
     ]
 
     merged_results = []
