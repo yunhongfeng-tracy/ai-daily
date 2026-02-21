@@ -554,13 +554,15 @@ def search_tools():
     recent = set(history.get("recent", [])[-80:])
 
     # Query set: bias toward *direct entry points* (repo/package/spaces/models).
+    # NOTE: Brave API doesn't reliably support advanced operators like site:.
+    # We query broadly, then enforce host/path constraints locally.
     queries = [
-        "site:github.com (release OR released) (AI OR LLM OR agent OR RAG) open source",
-        "site:pypi.org/project AI (llm OR agent OR rag)",
-        "site:npmjs.com/package (llm OR agent OR rag)",
-        "site:huggingface.co/spaces (llm OR agent OR rag)",
-        "site:huggingface.co/models (llm OR agent OR rag)",
-        "new open source AI tool GitHub repo",
+        "new open source AI tool GitHub release",
+        "new AI agent framework open source",
+        "PyPI new LLM package",
+        "new npm LLM agent package",
+        "Hugging Face new space LLM tool",
+        "Hugging Face new model release",
     ]
 
     deny_hosts = {
