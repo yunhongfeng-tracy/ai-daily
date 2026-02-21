@@ -192,6 +192,10 @@ def _is_reputable_source(url: str) -> bool:
         "washingtonpost.com",
         "economist.com",
         "forbes.com",
+        "zdnet.com",
+        "tomshardware.com",
+        "semafor.com",
+        "theinformation.com",
         # science
         "nature.com",
         "science.org",
