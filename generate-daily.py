@@ -236,6 +236,14 @@ def _is_probable_homepage_or_section(url: str, title: str) -> bool:
         if host == "reuters.com" and path in {"/technology", "/world", "/business"}:
             return True
 
+        # Product Hunt category/review/alternative pages are not tool launches
+        if host == "producthunt.com":
+            bad_prefixes = ("/categories/", "/products/")
+            if path.startswith(bad_prefixes) and (
+                "/reviews" in path or "/alternatives" in path or path.startswith("/categories/")
+            ):
+                return True
+
         # generic “news hub” titles
         if re.search(r"\b(latest|today|news)\b", t) and ("/" not in (p.path or "").strip("/")):
             return True
