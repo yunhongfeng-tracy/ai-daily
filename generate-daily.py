@@ -550,10 +550,10 @@ def search_tools():
 
     # Query set: bias toward new tools + releases.
     queries = [
-        "new open source AI tool GitHub released",
-        "GitHub release new AI agent framework",
+        "site:github.com released open source AI tool",
+        "site:github.com AI agent framework release",
+        "site:huggingface.co new tool open source",
         "new local LLM tool Ollama LM Studio release",
-        "Product Hunt new AI developer tool",
         "new RAG tool open source GitHub",
     ]
 
