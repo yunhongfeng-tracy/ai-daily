@@ -445,6 +445,27 @@ def search_news():
                 if len(filtered) >= 7:
                     break
 
+        # Pass 4: if still too few, broaden recency to 7 days (still reputable + not homepage)
+        if len(filtered) < 5:
+            broaden_hours = 168
+            for item in results:
+                title = clean_text(item.get('title', ''))
+                url_i = item.get('url', '')
+                if not title or not url_i:
+                    continue
+                page_age = _parse_iso_dt(item.get('page_age'))
+                if page_age:
+                    age_hours = (now - page_age).total_seconds() / 3600
+                    if age_hours > broaden_hours:
+                        continue
+                if _is_probable_homepage_or_section(url_i, title):
+                    continue
+                if not _is_reputable_source(url_i):
+                    continue
+                add_item(item)
+                if len(filtered) >= 6:
+                    break
+
         filtered.sort(key=_score_item, reverse=True)
         data.setdefault('web', {})['results'] = filtered
         print(f"✓ 原始结果 {len(results)} 条，筛选后 {len(filtered)} 条")
