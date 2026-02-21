@@ -8,6 +8,7 @@ import re
 import json
 import subprocess
 import urllib.request
+import urllib.parse
 from datetime import datetime
 from urllib.parse import urlparse
 
@@ -148,25 +149,210 @@ def get_source_name(url):
     except:
         return '未知来源'
 
+def _parse_iso_dt(s: str):
+    if not s:
+        return None
+    try:
+        # Brave returns ISO timestamps like 2026-02-20T05:39:45
+        return datetime.fromisoformat(s)
+    except Exception:
+        return None
+
+
+def _is_reputable_source(url: str) -> bool:
+    """Very conservative allowlist for '有效新闻' quality."""
+    if not url:
+        return False
+    host = urlparse(url).netloc.lower().replace("www.", "")
+
+    allow = {
+        # mainstream tech/business
+        "reuters.com",
+        "bloomberg.com",
+        "ft.com",
+        "wsj.com",
+        "cnbc.com",
+        "axios.com",
+        "theverge.com",
+        "arstechnica.com",
+        "wired.com",
+        "techcrunch.com",
+        "venturebeat.com",
+        "spectrum.ieee.org",
+        # science
+        "nature.com",
+        "science.org",
+        "mit.edu",
+        # vendor / labs / official
+        "openai.com",
+        "anthropic.com",
+        "deepmind.google",
+        "blog.google",
+        "ai.google.dev",
+        "cloud.google.com",
+        "microsoft.com",
+        "nvidia.com",
+        "huggingface.co",
+        # ecosystem
+        "github.com",
+    }
+
+    return host in allow
+
+
+def _looks_like_real_news_item(title: str, desc: str) -> bool:
+    t = (title or "").lower()
+    d = (desc or "").lower()
+
+    # avoid homepages/aggregators/SEO sludge
+    bad_patterns = [
+        r"\blatest news\b",
+        r"\bai news\b\s*\|",
+        r"\bhome\b",
+        r"\bnewsletter\b",
+        r"\bsubscribe\b",
+        r"\bregister\b",
+        r"\blogin\b",
+        r"\bpricing\b",
+        r"\bjobs\b",
+    ]
+    if any(re.search(p, t) for p in bad_patterns):
+        return False
+
+    # require at least some "event" signal
+    signal_words = [
+        "launch",
+        "released",
+        "release",
+        "announces",
+        "announced",
+        "unveils",
+        "debut",
+        "funding",
+        "raises",
+        "acquires",
+        "acquisition",
+        "partnership",
+        "regulation",
+        "lawsuit",
+        "ban",
+        "policy",
+        "model",
+        "chip",
+        "gpu",
+        "security",
+        "openai",
+        "anthropic",
+        "google",
+        "microsoft",
+        "nvidia",
+        "deepseek",
+        "qwen",
+        "gemini",
+        "claude",
+    ]
+    blob = f"{t} {d}"
+    return any(w in blob for w in signal_words)
+
+
+def _score_item(item: dict) -> float:
+    """Cheap heuristic score: prioritize recency + reputable domains."""
+    url = item.get("url", "")
+    host = (item.get("meta_url") or {}).get("netloc", "")
+    host = (host or urlparse(url).netloc).lower().replace("www.", "")
+
+    # domain weights
+    domain_boost = 0.0
+    if host in {"reuters.com", "bloomberg.com", "ft.com", "wsj.com"}:
+        domain_boost = 3.0
+    elif host in {"theverge.com", "arstechnica.com", "wired.com", "techcrunch.com", "axios.com", "cnbc.com"}:
+        domain_boost = 2.0
+    elif host in {"openai.com", "anthropic.com", "ai.google.dev", "cloud.google.com", "microsoft.com", "nvidia.com"}:
+        domain_boost = 2.5
+    elif host:
+        domain_boost = 0.5
+
+    # recency: newer => higher
+    page_age = _parse_iso_dt(item.get("page_age"))
+    recency = 0.0
+    if page_age:
+        hours = (datetime.now() - page_age).total_seconds() / 3600
+        # clamp (0..72h)
+        hours = max(0.0, min(72.0, hours))
+        recency = (72.0 - hours) / 24.0  # 0..3
+
+    return domain_boost + recency
+
+
 def search_news():
-    """搜索AI新闻"""
+    """搜索AI新闻（并做筛选：近两天 + 可信来源 + 更像新闻的条目）"""
     print(f"🤖 AI Daily Generator - {TODAY}")
     print("📰 搜索AI新闻...")
-    
+
     BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY')
     if not BRAVE_API_KEY:
         print("搜索失败: BRAVE_API_KEY not set")
         return None
-    url = f"https://api.search.brave.com/res/v1/web/search?q=AI+artificial+intelligence+news+today&count=8"
+
+    # Freshness: past day, count higher then filter locally.
+    q = "(OpenAI OR Anthropic OR Google OR Microsoft OR NVIDIA OR DeepSeek OR Qwen OR Gemini OR Claude) AI news"
+    url = (
+        "https://api.search.brave.com/res/v1/web/search?"
+        + "q=" + urllib.parse.quote(q)
+        + "&count=25"
+        + "&freshness=pd"
+    )
+
     req = urllib.request.Request(url, headers={
         'Accept': 'application/json',
         'X-Subscription-Token': BRAVE_API_KEY
     })
-    
+
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
-            data = response.read().decode('utf-8')
-            return json.loads(data)
+            data = json.loads(response.read().decode('utf-8'))
+
+        # Filter + rank in-place so the rest of the pipeline stays simple.
+        results = (data.get('web', {}) or {}).get('results', [])
+        filtered = []
+        seen = set()
+
+        cutoff_hours = 48
+        now = datetime.now()
+
+        for item in results:
+            title = clean_text(item.get('title', ''))
+            url_i = item.get('url', '')
+            desc = clean_text(item.get('description', ''))
+
+            if not title or not url_i:
+                continue
+
+            # recency cutoff (use Brave page_age)
+            page_age = _parse_iso_dt(item.get('page_age'))
+            if page_age:
+                age_hours = (now - page_age).total_seconds() / 3600
+                if age_hours > cutoff_hours:
+                    continue
+
+            # quality gates
+            if not _is_reputable_source(url_i):
+                continue
+            if not _looks_like_real_news_item(title, desc):
+                continue
+
+            key = (re.sub(r"\W+", "", title.lower())[:80], urlparse(url_i).netloc.lower())
+            if key in seen:
+                continue
+            seen.add(key)
+
+            filtered.append(item)
+
+        filtered.sort(key=_score_item, reverse=True)
+        data.setdefault('web', {})['results'] = filtered
+        print(f"✓ 原始结果 {len(results)} 条，筛选后 {len(filtered)} 条")
+        return data
+
     except Exception as e:
         print(f"搜索失败: {e}")
         return None
