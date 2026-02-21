@@ -565,9 +565,15 @@ def search_tools():
         "x.com",
         "instagram.com",
         "tiktok.com",
+        "reddit.com",
+        "www.reddit.com",
+        "uptodown.com",
+        "ollama.en.uptodown.com",
     }
 
     results = []
+    github_first = []
+    non_github = []
     seen = set()
 
     for i, q in enumerate(queries):
@@ -619,25 +625,35 @@ def search_tools():
             if dt:
                 date = dt.strftime("%Y-%m-%d")
 
-            results.append({
+            obj = {
                 "name": title,
                 "url": url_i,
                 "desc": desc,
                 "source": get_source_name(url_i),
                 "date": date,
-            })
+            }
+
+            if host == "github.com":
+                github_first.append(obj)
+            else:
+                non_github.append(obj)
 
     # simple ranking: prefer GitHub (open source) and newer
     def score(t):
         host = urlparse(t.get("url", "")).netloc.lower().replace("www.", "")
         s = 0.0
         if host == "github.com":
-            s += 2.0
+            s += 3.0
+        if "release" in (t.get("name", "").lower() + " " + t.get("desc", "").lower()):
+            s += 0.5
         if t.get("date"):
             s += 1.0
         return s
 
-    results.sort(key=score, reverse=True)
+    github_first.sort(key=score, reverse=True)
+    non_github.sort(key=score, reverse=True)
+
+    results = (github_first + non_github)
 
     # update history (store urls)
     picked = results[:3]
