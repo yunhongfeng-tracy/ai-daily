@@ -184,6 +184,13 @@ def _is_reputable_source(url: str) -> bool:
         "venturebeat.com",
         "spectrum.ieee.org",
         "sfchronicle.com",
+        "pcmag.com",
+        "bbc.com",
+        "theguardian.com",
+        "nytimes.com",
+        "washingtonpost.com",
+        "economist.com",
+        "forbes.com",
         # science
         "nature.com",
         "science.org",
@@ -407,19 +414,18 @@ def search_news():
                 if len(filtered) >= 7:
                     break
 
-        # Pass 3: last resort — accept recent items (avoid obvious spam by title)
+        # Pass 3: last resort — still require reputable sources, only relax the "news signal".
         if len(filtered) < 5:
             for item in results:
                 title = clean_text(item.get('title', ''))
                 url_i = item.get('url', '')
-                desc = clean_text(item.get('description', ''))
                 if not title or not url_i:
                     continue
                 if not recency_ok(item):
                     continue
                 if _is_probable_homepage_or_section(url_i, title):
                     continue
-                if not _looks_like_real_news_item(title, desc):
+                if not _is_reputable_source(url_i):
                     continue
                 add_item(item)
                 if len(filtered) >= 7:
