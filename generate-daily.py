@@ -320,6 +320,26 @@ def search_news():
         cutoff_hours = 48
         now = datetime.now()
 
+        def recency_ok(item_):
+            page_age_ = _parse_iso_dt(item_.get('page_age'))
+            if not page_age_:
+                return True  # keep unknown, but will be scored lower
+            age_hours_ = (now - page_age_).total_seconds() / 3600
+            return age_hours_ <= cutoff_hours
+
+        def add_item(item_):
+            title_ = clean_text(item_.get('title', ''))
+            url_ = item_.get('url', '')
+            if not title_ or not url_:
+                return False
+            key_ = (re.sub(r"\W+", "", title_.lower())[:80], urlparse(url_).netloc.lower())
+            if key_ in seen:
+                return False
+            seen.add(key_)
+            filtered.append(item_)
+            return True
+
+        # Pass 1: strict (reputable + looks like news + recency)
         for item in results:
             title = clean_text(item.get('title', ''))
             url_i = item.get('url', '')
@@ -327,26 +347,44 @@ def search_news():
 
             if not title or not url_i:
                 continue
-
-            # recency cutoff (use Brave page_age)
-            page_age = _parse_iso_dt(item.get('page_age'))
-            if page_age:
-                age_hours = (now - page_age).total_seconds() / 3600
-                if age_hours > cutoff_hours:
-                    continue
-
-            # quality gates
+            if not recency_ok(item):
+                continue
             if not _is_reputable_source(url_i):
                 continue
             if not _looks_like_real_news_item(title, desc):
                 continue
+            add_item(item)
 
-            key = (re.sub(r"\W+", "", title.lower())[:80], urlparse(url_i).netloc.lower())
-            if key in seen:
-                continue
-            seen.add(key)
+        # Pass 2: relax "news signal" if we have too few
+        if len(filtered) < 5:
+            for item in results:
+                title = clean_text(item.get('title', ''))
+                url_i = item.get('url', '')
+                if not title or not url_i:
+                    continue
+                if not recency_ok(item):
+                    continue
+                if not _is_reputable_source(url_i):
+                    continue
+                add_item(item)
+                if len(filtered) >= 7:
+                    break
 
-            filtered.append(item)
+        # Pass 3: last resort — accept recent items (avoid obvious spam by title)
+        if len(filtered) < 5:
+            for item in results:
+                title = clean_text(item.get('title', ''))
+                url_i = item.get('url', '')
+                desc = clean_text(item.get('description', ''))
+                if not title or not url_i:
+                    continue
+                if not recency_ok(item):
+                    continue
+                if not _looks_like_real_news_item(title, desc):
+                    continue
+                add_item(item)
+                if len(filtered) >= 7:
+                    break
 
         filtered.sort(key=_score_item, reverse=True)
         data.setdefault('web', {})['results'] = filtered
