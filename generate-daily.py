@@ -7,6 +7,7 @@ import os
 import re
 import json
 import subprocess
+import time
 import urllib.request
 import urllib.parse
 from datetime import datetime
@@ -334,26 +335,34 @@ def search_news():
         print("搜索失败: BRAVE_API_KEY not set")
         return None
 
-    # Freshness: past day, count higher then filter locally.
-    q = "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news"
-    params = {
-        "q": q,
-        "count": 20,
-        "freshness": "pd",
-    }
-    url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
+    # Freshness: past day; we do 2 queries (rate-limited to 1 QPS on free plan).
+    queries = [
+        "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news",
+        "AI model released benchmark safety regulation funding NVIDIA chip",
+    ]
 
-    req = urllib.request.Request(url, headers={
-        'Accept': 'application/json',
-        'X-Subscription-Token': BRAVE_API_KEY
-    })
+    merged_results = []
+    data = {"web": {"results": merged_results}}
 
     try:
-        with urllib.request.urlopen(req, timeout=30) as response:
-            data = json.loads(response.read().decode('utf-8'))
+        for idx, q in enumerate(queries):
+            params = {"q": q, "count": 20, "freshness": "pd"}
+            url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
+            req = urllib.request.Request(url, headers={
+                'Accept': 'application/json',
+                'X-Subscription-Token': BRAVE_API_KEY
+            })
+
+            # avoid 429 on Free plan (1 QPS)
+            if idx > 0:
+                time.sleep(1.2)
+
+            with urllib.request.urlopen(req, timeout=30) as response:
+                chunk = json.loads(response.read().decode('utf-8'))
+                merged_results.extend(((chunk.get('web', {}) or {}).get('results', [])) or [])
 
         # Filter + rank in-place so the rest of the pipeline stays simple.
-        results = (data.get('web', {}) or {}).get('results', [])
+        results = merged_results
         filtered = []
         seen = set()
 
