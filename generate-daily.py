@@ -510,26 +510,33 @@ def _save_json(path: str, obj):
 
 
 def _is_probable_tool_page(url: str, title: str, desc: str) -> bool:
-    # reject obvious listicles / SEO sludge
+    """Heuristic for tool-type pages.
+
+    Plan B is noisy; prioritize "not spam" over "perfectly new".
+    """
     t = (title or "").lower()
     d = (desc or "").lower()
+    blob = t + " " + d
+
+    # reject obvious listicles / SEO sludge
     bad = [
         "best ai tools",
         "top ai tools",
         "ultimate guide",
         "list of",
-        "pricing",
         "coupon",
         "discount",
         "affiliat",
     ]
-    if any(b in (t + " " + d) for b in bad):
+    if any(b in blob for b in bad):
         return False
 
-    # require some “new/update/release” signal
-    sig = ["launch", "launched", "release", "released", "introduc", "announce", "unveil", "open source", "github", "v\d", "beta"]
-    blob = t + " " + d
-    return any(s in blob for s in sig)
+    # must at least look AI/dev related
+    must = ["ai", "llm", "agent", "rag", "open source", "github", "model", "prompt", "inference", "copilot", "coding"]
+    if not any(m in blob for m in must):
+        return False
+
+    return True
 
 
 def search_tools():
