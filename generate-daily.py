@@ -296,12 +296,12 @@ def search_news():
 
     # Freshness: past day, count higher then filter locally.
     q = "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news"
-    url = (
-        "https://api.search.brave.com/res/v1/web/search?"
-        + "q=" + urllib.parse.quote(q)
-        + "&count=25"
-        + "&freshness=pd"
-    )
+    params = {
+        "q": q,
+        "count": 25,
+        "freshness": "pd",
+    }
+    url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
 
     req = urllib.request.Request(url, headers={
         'Accept': 'application/json',
