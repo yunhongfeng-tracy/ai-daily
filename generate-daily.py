@@ -298,7 +298,7 @@ def search_news():
     q = "OpenAI Anthropic Google Microsoft NVIDIA DeepSeek Qwen Gemini Claude AI news"
     params = {
         "q": q,
-        "count": 25,
+        "count": 20,
         "freshness": "pd",
     }
     url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
