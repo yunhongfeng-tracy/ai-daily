@@ -165,6 +165,10 @@ def _is_reputable_source(url: str) -> bool:
         return False
     host = urlparse(url).netloc.lower().replace("www.", "")
 
+    # hard deny
+    if host.endswith("wikipedia.org"):
+        return False
+
     allow = {
         # mainstream tech/business
         "reuters.com",
@@ -179,6 +183,7 @@ def _is_reputable_source(url: str) -> bool:
         "techcrunch.com",
         "venturebeat.com",
         "spectrum.ieee.org",
+        "sfchronicle.com",
         # science
         "nature.com",
         "science.org",
@@ -198,6 +203,34 @@ def _is_reputable_source(url: str) -> bool:
     }
 
     return host in allow
+
+
+def _is_probable_homepage_or_section(url: str, title: str) -> bool:
+    """Reject non-article pages (homepages/sections/category indexes)."""
+    try:
+        p = urlparse(url)
+        host = p.netloc.lower().replace("www.", "")
+        path = (p.path or "/").rstrip("/")
+        t = (title or "").lower()
+
+        if "wikipedia" in host or "wikipedia" in t:
+            return True
+
+        # obvious home/section pages
+        if path in {"", "/", "/technology", "/tech", "/ai"}:
+            return True
+
+        # Reuters section pages are common results; avoid them.
+        if host == "reuters.com" and path in {"/technology", "/world", "/business"}:
+            return True
+
+        # generic “news hub” titles
+        if re.search(r"\b(latest|today|news)\b", t) and ("/" not in (p.path or "").strip("/")):
+            return True
+
+        return False
+    except Exception:
+        return False
 
 
 def _looks_like_real_news_item(title: str, desc: str) -> bool:
@@ -349,6 +382,8 @@ def search_news():
                 continue
             if not recency_ok(item):
                 continue
+            if _is_probable_homepage_or_section(url_i, title):
+                continue
             if not _is_reputable_source(url_i):
                 continue
             if not _looks_like_real_news_item(title, desc):
@@ -363,6 +398,8 @@ def search_news():
                 if not title or not url_i:
                     continue
                 if not recency_ok(item):
+                    continue
+                if _is_probable_homepage_or_section(url_i, title):
                     continue
                 if not _is_reputable_source(url_i):
                     continue
@@ -379,6 +416,8 @@ def search_news():
                 if not title or not url_i:
                     continue
                 if not recency_ok(item):
+                    continue
+                if _is_probable_homepage_or_section(url_i, title):
                     continue
                 if not _looks_like_real_news_item(title, desc):
                     continue
