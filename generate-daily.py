@@ -557,26 +557,14 @@ def search_tools():
         "new RAG tool open source GitHub",
     ]
 
-    # Allowlist is broad, but still curated (avoid random blogs).
-    allow_hosts = {
-        "github.com",
-        "huggingface.co",
-        "pypi.org",
-        "npmjs.com",
-        "producthunt.com",
-        "replicate.com",
-        "vercel.com",
-        "ollama.com",
-        "lmstudio.ai",
-        "openrouter.ai",
-        "modal.com",
-        "langchain.com",
-        "arxiv.org",
-        # mainstream tech/business (tool launches sometimes reported here)
-        "techcrunch.com",
-        "theverge.com",
-        "arstechnica.com",
-        "wired.com",
+    # For tools, allowlist tends to miss real updates; use a denylist instead.
+    deny_hosts = {
+        "pinterest.com",
+        "facebook.com",
+        "twitter.com",
+        "x.com",
+        "instagram.com",
+        "tiktok.com",
     }
 
     results = []
@@ -610,7 +598,7 @@ def search_tools():
             host = (item.get('meta_url') or {}).get('netloc') or urlparse(url_i).netloc
             host = (host or "").lower().replace("www.", "")
 
-            if host not in allow_hosts:
+            if host in deny_hosts:
                 continue
             if url_i in recent:
                 continue
