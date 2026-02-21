@@ -553,14 +553,14 @@ def search_tools():
     history = _load_json(history_path, {"recent": []})
     recent = set(history.get("recent", [])[-80:])
 
-    # Query set: bias toward real tool artifacts (repo/release/package) + official posts.
+    # Query set: bias toward *direct entry points* (repo/package/spaces/models).
     queries = [
         "site:github.com (release OR released) (AI OR LLM OR agent OR RAG) open source",
-        "site:github.com (v0. OR v1. OR v2.) (AI OR LLM OR agent) release notes",
-        "site:pypi.org AI tool released",
-        "site:npmjs.com AI agent framework",
-        "site:huggingface.co/spaces new AI tool",
-        "new open source AI tool released GitHub",
+        "site:pypi.org/project AI (llm OR agent OR rag)",
+        "site:npmjs.com/package (llm OR agent OR rag)",
+        "site:huggingface.co/spaces (llm OR agent OR rag)",
+        "site:huggingface.co/models (llm OR agent OR rag)",
+        "new open source AI tool GitHub repo",
     ]
 
     deny_hosts = {
@@ -572,12 +572,15 @@ def search_tools():
         "dev.to",
         "discuss.huggingface.co",
         # rumor / low-signal sites
-        "llmrumors.com",
-        "www.llmrumors.com",
+        "llmrumors.com", "www.llmrumors.com",
         # download farms / aggregators
         "uptodown.com", "ollama.en.uptodown.com",
         # generic social
         "pinterest.com", "facebook.com", "twitter.com", "x.com", "instagram.com", "tiktok.com",
+        # news/report-only (not direct tool entry)
+        "itbrief.com.au", "itbrief.asia", "itbrief.com.au",
+        "techedubyte.com", "www.techedubyte.com",
+        "itbrief.com.au",
     }
 
     def is_bad_tool_page(url_i: str, title: str, desc: str) -> bool:
@@ -605,21 +608,27 @@ def search_tools():
         p = urlparse(url_i)
         host = p.netloc.lower().replace("www.", "")
         path = (p.path or "")
+
         if host == "github.com":
             parts = [x for x in path.split("/") if x]
             if len(parts) < 2:
                 return False
-            # reject issues / pulls / discussions (not a tool artifact)
             if len(parts) >= 3 and parts[2] in {"issues", "pull", "pulls", "discussions"}:
                 return False
             return True
+
         if host == "pypi.org":
             return path.startswith("/project/")
+
         if host == "npmjs.com":
             return path.startswith("/package/")
+
         if host == "huggingface.co":
+            # direct pages only, not docs/discuss
             return path.startswith("/spaces/") or path.startswith("/models/")
-        return True
+
+        # For 'direct entry' mode, reject unknown hosts.
+        return False
 
     picked = []
     seen = set()
