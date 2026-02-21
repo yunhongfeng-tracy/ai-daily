@@ -370,7 +370,7 @@ def search_news():
         filtered = []
         seen = set()
 
-        cutoff_hours = 48
+        cutoff_hours = 72
         now = datetime.now()
 
         def recency_ok(item_):
