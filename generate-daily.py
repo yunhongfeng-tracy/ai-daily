@@ -540,11 +540,9 @@ def _is_probable_tool_page(url: str, title: str, desc: str) -> bool:
 
 
 def search_tools():
-    """动态抓工具推荐（方案B）。
+    """动态抓工具推荐（方案B / 宁缺毋滥）。
 
-    - 用 Brave 搜索新品/更新
-    - 过滤掉 listicle/营销
-    - 记录历史，避免近期重复
+    目标：宁可只有 1-2 个，也不塞“论坛帖子/合集页/下载站/教程盘点”。
     """
 
     BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY')
@@ -553,41 +551,79 @@ def search_tools():
 
     history_path = os.path.join(REPO_DIR, "tools_history.json")
     history = _load_json(history_path, {"recent": []})
-    recent = set(history.get("recent", [])[-50:])
+    recent = set(history.get("recent", [])[-80:])
 
-    # Query set: bias toward new tools + releases.
+    # Query set: bias toward real tool artifacts (repo/release/package) + official posts.
     queries = [
-        "site:github.com released open source AI tool",
-        "site:github.com AI agent framework release",
-        "site:huggingface.co new tool open source",
-        "new local LLM tool Ollama LM Studio release",
-        "new RAG tool open source GitHub",
+        "site:github.com (release OR released) (AI OR LLM OR agent OR RAG) open source",
+        "site:github.com (v0. OR v1. OR v2.) (AI OR LLM OR agent) release notes",
+        "site:pypi.org AI tool released",
+        "site:npmjs.com AI agent framework",
+        "site:huggingface.co/spaces new AI tool",
+        "new open source AI tool released GitHub",
     ]
 
-    # For tools, allowlist tends to miss real updates; use a denylist instead.
     deny_hosts = {
-        "pinterest.com",
-        "facebook.com",
-        "twitter.com",
-        "x.com",
-        "instagram.com",
-        "tiktok.com",
-        "reddit.com",
-        "www.reddit.com",
-        "uptodown.com",
-        "ollama.en.uptodown.com",
+        # social / forums / noisy
+        "reddit.com", "www.reddit.com",
+        "news.ycombinator.com",
+        "medium.com",
+        "substack.com",
+        "dev.to",
+        "discuss.huggingface.co",
+        # download farms / aggregators
+        "uptodown.com", "ollama.en.uptodown.com",
+        # generic social
+        "pinterest.com", "facebook.com", "twitter.com", "x.com", "instagram.com", "tiktok.com",
     }
 
-    results = []
-    github_first = []
-    non_github = []
+    def is_bad_tool_page(url_i: str, title: str, desc: str) -> bool:
+        p = urlparse(url_i)
+        host = p.netloc.lower().replace("www.", "")
+        path = (p.path or "").lower()
+        blob = (title + " " + desc).lower()
+
+        # listicles / roundups / guides
+        bad_words = ["best ", "top ", "ultimate", "definitive", "guide", "list of", "alternatives", "reviews", "pricing"]
+        if any(w in blob for w in bad_words):
+            return True
+
+        # forums / threads
+        if any(x in path for x in ["/forum", "/forums", "/thread", "/threads", "/discussion", "/discuss"]):
+            return True
+
+        # producthunt category/review/alternatives etc.
+        if host == "producthunt.com" and ("/categories/" in path or "/reviews" in path or "/alternatives" in path):
+            return True
+
+        return False
+
+    def looks_like_tool_artifact(url_i: str) -> bool:
+        p = urlparse(url_i)
+        host = p.netloc.lower().replace("www.", "")
+        path = (p.path or "")
+        if host == "github.com":
+            # /owner/repo or /owner/repo/releases
+            parts = [x for x in path.split("/") if x]
+            return len(parts) >= 2
+        if host == "pypi.org":
+            return path.startswith("/project/")
+        if host == "npmjs.com":
+            return path.startswith("/package/")
+        if host == "huggingface.co":
+            return path.startswith("/spaces/") or path.startswith("/models/")
+        return True
+
+    picked = []
     seen = set()
 
     for i, q in enumerate(queries):
+        if len(picked) >= 3:
+            break
         if i > 0:
-            time.sleep(1.2)  # brave free plan 1 QPS
+            time.sleep(1.2)  # Brave free plan: 1 QPS
 
-        params = {"q": q, "count": 20, "freshness": "pw"}  # past week fits tools better
+        params = {"q": q, "count": 20, "freshness": "pw"}
         url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
         req = urllib.request.Request(url, headers={
             'Accept': 'application/json',
@@ -617,57 +653,38 @@ def search_tools():
                 continue
             if _is_probable_homepage_or_section(url_i, title):
                 continue
-            if not _is_probable_tool_page(url_i, title, desc):
+            if is_bad_tool_page(url_i, title, desc):
+                continue
+            if not looks_like_tool_artifact(url_i):
                 continue
 
-            key = (re.sub(r"\W+", "", title.lower())[:80], host)
+            # cheap de-dupe
+            key = (re.sub(r"\W+", "", title.lower())[:90], host)
             if key in seen:
                 continue
             seen.add(key)
 
-            # prefer Brave 'page_age' when available
-            page_age = item.get("page_age")
+            # date from page_age when possible
             date = None
-            dt = _parse_iso_dt(page_age)
+            dt = _parse_iso_dt(item.get("page_age"))
             if dt:
                 date = dt.strftime("%Y-%m-%d")
 
-            obj = {
+            picked.append({
                 "name": title,
                 "url": url_i,
                 "desc": desc,
                 "source": get_source_name(url_i),
                 "date": date,
-            }
+            })
 
-            if host == "github.com":
-                github_first.append(obj)
-            else:
-                non_github.append(obj)
+            if len(picked) >= 3:
+                break
 
-    # simple ranking: prefer GitHub (open source) and newer
-    def score(t):
-        host = urlparse(t.get("url", "")).netloc.lower().replace("www.", "")
-        s = 0.0
-        if host == "github.com":
-            s += 3.0
-        if "release" in (t.get("name", "").lower() + " " + t.get("desc", "").lower()):
-            s += 0.5
-        if t.get("date"):
-            s += 1.0
-        return s
-
-    github_first.sort(key=score, reverse=True)
-    non_github.sort(key=score, reverse=True)
-
-    results = (github_first + non_github)
-
-    # update history (store urls)
-    picked = results[:3]
     if picked:
         history.setdefault("recent", [])
         history["recent"].extend([p["url"] for p in picked])
-        history["recent"] = history["recent"][-200:]
+        history["recent"] = history["recent"][-300:]
         _save_json(history_path, history)
 
     return picked
