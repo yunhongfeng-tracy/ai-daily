@@ -484,6 +484,168 @@ def search_news():
         print(f"搜索失败: {e}")
         return None
 
+def _load_json(path: str, default):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+
+def _save_json(path: str, obj):
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(obj, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def _is_probable_tool_page(url: str, title: str, desc: str) -> bool:
+    # reject obvious listicles / SEO sludge
+    t = (title or "").lower()
+    d = (desc or "").lower()
+    bad = [
+        "best ai tools",
+        "top ai tools",
+        "ultimate guide",
+        "list of",
+        "pricing",
+        "coupon",
+        "discount",
+        "affiliat",
+    ]
+    if any(b in (t + " " + d) for b in bad):
+        return False
+
+    # require some “new/update/release” signal
+    sig = ["launch", "launched", "release", "released", "introduc", "announce", "unveil", "open source", "github", "v\d", "beta"]
+    blob = t + " " + d
+    return any(s in blob for s in sig)
+
+
+def search_tools():
+    """动态抓工具推荐（方案B）。
+
+    - 用 Brave 搜索新品/更新
+    - 过滤掉 listicle/营销
+    - 记录历史，避免近期重复
+    """
+
+    BRAVE_API_KEY = os.environ.get('BRAVE_API_KEY')
+    if not BRAVE_API_KEY:
+        return None
+
+    history_path = os.path.join(REPO_DIR, "tools_history.json")
+    history = _load_json(history_path, {"recent": []})
+    recent = set(history.get("recent", [])[-50:])
+
+    # Query set: bias toward GitHub releases + product launches.
+    queries = [
+        "new open source AI tool GitHub release",
+        "launch AI developer tool open source",
+        "new AI agent framework GitHub",
+    ]
+
+    allow_hosts = {
+        "github.com",
+        "huggingface.co",
+        "openai.com",
+        "anthropic.com",
+        "ai.google.dev",
+        "blog.google",
+        "microsoft.com",
+        "nvidia.com",
+        "arstechnica.com",
+        "theverge.com",
+        "techcrunch.com",
+        "wired.com",
+        "producthunt.com",
+    }
+
+    results = []
+    seen = set()
+
+    for i, q in enumerate(queries):
+        if i > 0:
+            time.sleep(1.2)  # brave free plan 1 QPS
+
+        params = {"q": q, "count": 10, "freshness": "pw"}  # past week fits tools better
+        url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
+        req = urllib.request.Request(url, headers={
+            'Accept': 'application/json',
+            'X-Subscription-Token': BRAVE_API_KEY
+        })
+
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                data = json.loads(response.read().decode('utf-8'))
+        except Exception:
+            continue
+
+        for item in (data.get('web', {}) or {}).get('results', []):
+            title = clean_text(item.get('title', ''))
+            url_i = item.get('url', '')
+            desc = clean_text(item.get('description', ''))
+
+            if not title or not url_i:
+                continue
+
+            host = (item.get('meta_url') or {}).get('netloc') or urlparse(url_i).netloc
+            host = (host or "").lower().replace("www.", "")
+
+            if host not in allow_hosts:
+                continue
+            if url_i in recent:
+                continue
+            if _is_probable_homepage_or_section(url_i, title):
+                continue
+            if not _is_probable_tool_page(url_i, title, desc):
+                continue
+
+            key = (re.sub(r"\W+", "", title.lower())[:80], host)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            # prefer Brave 'page_age' when available
+            page_age = item.get("page_age")
+            date = None
+            dt = _parse_iso_dt(page_age)
+            if dt:
+                date = dt.strftime("%Y-%m-%d")
+
+            results.append({
+                "name": title,
+                "url": url_i,
+                "desc": desc,
+                "source": get_source_name(url_i),
+                "date": date,
+            })
+
+    # simple ranking: prefer GitHub (open source) and newer
+    def score(t):
+        host = urlparse(t.get("url", "")).netloc.lower().replace("www.", "")
+        s = 0.0
+        if host == "github.com":
+            s += 2.0
+        if t.get("date"):
+            s += 1.0
+        return s
+
+    results.sort(key=score, reverse=True)
+
+    # update history (store urls)
+    picked = results[:3]
+    if picked:
+        history.setdefault("recent", [])
+        history["recent"].extend([p["url"] for p in picked])
+        history["recent"] = history["recent"][-200:]
+        _save_json(history_path, history)
+
+    return picked
+
+
 def generate_daily():
     """生成日报"""
     data = search_news()
@@ -518,18 +680,34 @@ def generate_daily():
                     f.write(f"[阅读原文]({url})\n\n")
                     f.write("---\n\n")
         
-        # 工具推荐
+        # 工具推荐（方案B：动态抓新品/更新）
         f.write("## 🛠️ 工具推荐\n\n")
-        tools = [
-            ("v0.dev - AI UI生成器", "由Vercel推出的AI界面生成器，只需描述需求即可自动生成React/Tailwind组件。", "https://v0.app"),
-            ("Cursor - AI代码编辑器", "专为AI辅助编程设计的IDE，基于VS Code，支持智能代码补全和重构建议。", "https://cursor.com"),
-            ("Perplexity - AI搜索引擎", "结合大语言模型的搜索引擎，提供带有引用来源的答案，支持多种语言。", "https://www.perplexity.ai"),
-        ]
-        
-        for name, desc, link in tools:
-            f.write(f"### {name}\n\n")
-            f.write(f"📝 {desc}\n\n")
-            f.write(f"🔗 [访问]({link})\n\n")
+
+        tool_items = search_tools()
+        if tool_items:
+            for t in tool_items[:3]:
+                name = t.get("name") or t.get("title") or "(未命名工具)"
+                url = t.get("url") or ""
+                desc = t.get("desc") or ""
+                source = t.get("source") or get_source_name(url)
+                date = t.get("date")
+
+                name_cn = translate_with_deepseek(name)
+                desc_cn = translate_with_deepseek(desc) if desc else ""
+
+                f.write(f"### {name_cn}\n\n")
+                if date:
+                    f.write(f"来源: [{source}]({url})｜日期: {date}\n\n")
+                else:
+                    f.write(f"来源: [{source}]({url})\n\n")
+                if desc_cn:
+                    f.write(f"{desc_cn}\n\n")
+                f.write(f"[访问]({url})\n\n")
+                f.write("---\n\n")
+        else:
+            # fallback: still avoid total empty section
+            f.write("今天没抓到足够靠谱的新工具更新（可能被限流/来源不稳定）。\n\n")
+            f.write("建议：明天再看，或我可以改成‘工具池轮换’保证每天都有。\n\n")
             f.write("---\n\n")
         
         # 归档
