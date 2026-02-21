@@ -603,9 +603,13 @@ def search_tools():
         host = p.netloc.lower().replace("www.", "")
         path = (p.path or "")
         if host == "github.com":
-            # /owner/repo or /owner/repo/releases
             parts = [x for x in path.split("/") if x]
-            return len(parts) >= 2
+            if len(parts) < 2:
+                return False
+            # reject issues / pulls / discussions (not a tool artifact)
+            if len(parts) >= 3 and parts[2] in {"issues", "pull", "pulls", "discussions"}:
+                return False
+            return True
         if host == "pypi.org":
             return path.startswith("/project/")
         if host == "npmjs.com":
