@@ -540,27 +540,35 @@ def search_tools():
     history = _load_json(history_path, {"recent": []})
     recent = set(history.get("recent", [])[-50:])
 
-    # Query set: bias toward GitHub releases + product launches.
+    # Query set: bias toward new tools + releases.
     queries = [
-        "new open source AI tool GitHub release",
-        "launch AI developer tool open source",
-        "new AI agent framework GitHub",
+        "new open source AI tool GitHub released",
+        "GitHub release new AI agent framework",
+        "new local LLM tool Ollama LM Studio release",
+        "Product Hunt new AI developer tool",
+        "new RAG tool open source GitHub",
     ]
 
+    # Allowlist is broad, but still curated (avoid random blogs).
     allow_hosts = {
         "github.com",
         "huggingface.co",
-        "openai.com",
-        "anthropic.com",
-        "ai.google.dev",
-        "blog.google",
-        "microsoft.com",
-        "nvidia.com",
-        "arstechnica.com",
-        "theverge.com",
-        "techcrunch.com",
-        "wired.com",
+        "pypi.org",
+        "npmjs.com",
         "producthunt.com",
+        "replicate.com",
+        "vercel.com",
+        "ollama.com",
+        "lmstudio.ai",
+        "openrouter.ai",
+        "modal.com",
+        "langchain.com",
+        "arxiv.org",
+        # mainstream tech/business (tool launches sometimes reported here)
+        "techcrunch.com",
+        "theverge.com",
+        "arstechnica.com",
+        "wired.com",
     }
 
     results = []
@@ -570,7 +578,7 @@ def search_tools():
         if i > 0:
             time.sleep(1.2)  # brave free plan 1 QPS
 
-        params = {"q": q, "count": 10, "freshness": "pw"}  # past week fits tools better
+        params = {"q": q, "count": 20, "freshness": "pw"}  # past week fits tools better
         url = "https://api.search.brave.com/res/v1/web/search?" + urllib.parse.urlencode(params)
         req = urllib.request.Request(url, headers={
             'Accept': 'application/json',
