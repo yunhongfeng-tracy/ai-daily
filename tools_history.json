@@ -25,6 +25,9 @@
     "https://github.com/royapakzad/shadow-reasoning",
     "https://github.com/badlogic/pi-mono",
     "https://www.npmjs.com/package/exiv2",
-    "https://github.com/facebook/react"
+    "https://github.com/facebook/react",
+    "https://github.com/Arize-ai/phoenix",
+    "https://github.com/vllm-project/vllm",
+    "https://github.com/WP-API/WP-API"
   ]
 }
