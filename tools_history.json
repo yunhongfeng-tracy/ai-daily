@@ -28,6 +28,9 @@
     "https://github.com/facebook/react",
     "https://github.com/Arize-ai/phoenix",
     "https://github.com/vllm-project/vllm",
-    "https://github.com/WP-API/WP-API"
+    "https://github.com/WP-API/WP-API",
+    "https://pypi.org/project/astrix-openclaw-scanner",
+    "https://github.com/can1357/oh-my-pi",
+    "https://github.com/zloirock/core-js"
   ]
 }
