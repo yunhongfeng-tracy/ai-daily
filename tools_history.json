@@ -31,6 +31,9 @@
     "https://github.com/WP-API/WP-API",
     "https://pypi.org/project/astrix-openclaw-scanner",
     "https://github.com/can1357/oh-my-pi",
-    "https://github.com/zloirock/core-js"
+    "https://github.com/zloirock/core-js",
+    "https://github.com/p-e-w/heretic",
+    "https://github.com/MythicAgents/poseidon",
+    "https://github.com/ggerganov/llama.cpp"
   ]
 }
