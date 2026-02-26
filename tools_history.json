@@ -34,6 +34,9 @@
     "https://github.com/zloirock/core-js",
     "https://github.com/p-e-w/heretic",
     "https://github.com/MythicAgents/poseidon",
-    "https://github.com/ggerganov/llama.cpp"
+    "https://github.com/ggerganov/llama.cpp",
+    "https://github.com/stan-smith/FossFLOW",
+    "https://github.com/microsoft/mcp",
+    "https://github.com/HKUDS/nanobot"
   ]
 }
