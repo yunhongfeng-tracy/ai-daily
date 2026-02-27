@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Daily · 2026-02-27</title>
+    
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0ebe4;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.logo h1 {
+    font-size: 2rem;
+    color: #2c4a5a;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+.logo h1 span { color: #d4893a; }
+.logo p { color: #6b7f8a; font-size: 1rem; }
+
+/* 归档列表 */
+.archive-list {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
+    overflow: hidden;
+}
+.archive-item {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #e8e2d8;
+    transition: all 0.2s ease;
+}
+.archive-item:last-child { border-bottom: none; }
+.archive-item:hover { background: #faf7f2; }
+.archive-date {
+    font-size: 0.8rem;
+    color: #6b7f8a;
+    min-width: 90px;
+}
+.archive-title {
+    flex: 1;
+    font-size: 1rem;
+    color: #2c4a5a;
+    font-weight: 500;
+}
+.archive-arrow {
+    color: #d4893a;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+.archive-item:hover .archive-arrow { transform: translateX(3px); }
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #6b7f8a;
+    font-size: 0.85rem;
+}
+footer a { color: #d4893a !important; }
+
+/* 当日页面样式 */
+.day-page {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(44,74,90,0.08);
+    overflow: hidden;
+    max-width: 100%;
+    margin: 0 auto;
+}
+.day-header {
+    background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%);
+    padding: 40px;
+    color: white;
+    position: relative;
+}
+.day-header::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(212,137,58,0.15);
+}
+.day-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    position: relative;
+}
+.day-header .date {
+    opacity: 0.75;
+    font-size: 1rem;
+    position: relative;
+}
+.day-content { padding: 32px 40px; }
+
+/* 新闻网格布局 */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .news-grid { grid-template-columns: 1fr; }
+}
+.section-title {
+    font-size: 1.4rem;
+    color: #2c4a5a;
+    margin: 40px 0 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d4893a;
+    display: inline-block;
+}
+
+/* 新闻卡片 */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid #e8e2d8;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover {
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
+}
+.card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.card h3 {
+    font-size: 1.1rem;
+    color: #2c4a5a;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    line-height: 1.4;
+}
+.card .source {
+    font-size: 0.8rem;
+    color: #6b7f8a;
+    margin-bottom: 12px;
+}
+.card .source a {
+    color: #d4893a;
+    text-decoration: none;
+    font-weight: 500;
+}
+.card .source a:hover { text-decoration: underline; }
+.card p {
+    font-size: 0.95rem;
+    color: #4a5e6a;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+}
+.card .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #3d5a6e;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: auto;
+    transition: color 0.2s, gap 0.2s;
+}
+.card .read-more:hover { color: #d4893a; gap: 10px; }
+
+/* 工具卡片网格 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+@media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+}
+.tool-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e8e2d8;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.tool-card:hover {
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
+}
+.tool-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.tool-icon.purple { background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%); }
+.tool-icon.blue { background: linear-gradient(135deg, #4a7c8a 0%, #3d5a6e 100%); }
+.tool-icon.green { background: linear-gradient(135deg, #5a9a6e 0%, #3d7a58 100%); }
+.tool-icon.orange { background: linear-gradient(135deg, #d4893a 0%, #b86e2a 100%); }
+.tool-icon.pink { background: linear-gradient(135deg, #c45a6e 0%, #a84055 100%); }
+.tool-icon.teal { background: linear-gradient(135deg, #4a8a9a 0%, #3d6e7a 100%); }
+.tool-info { flex: 1; min-width: 0; }
+.tool-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c4a5a;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+.tool-desc {
+    font-size: 0.85rem;
+    color: #6b7f8a;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.tool-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    color: #d4893a;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #d4893a;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: auto;
+    transition: all 0.2s;
+}
+.tool-link:hover {
+    background: #d4893a;
+    color: white;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #3d5a6e;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #d4893a; }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="day-page">
+            <div class="day-header">
+                <h1>AI Daily · 2026-02-27</h1>
+                <p class="date">2026年02月27日 08:30</p>
+            </div>
+            <div class="day-content">
+                
+
+<h2 class="section-title">📰 今日新闻</h2>
+<div class="news-grid">
+<div class="card">
+    <div class="card-content">
+        <h3>独家：消息人士称，深度求索公司向英伟达等美国芯片制造商暂缓提供最新AI模型 | 路透社</h3>
+        <p class="source">来源: <a href="https://www.reuters.com/world/china/deepseek-withholds-latest-ai-model-us-chipmakers-including-nvidia-sources-say-2026-02-25/">路透社</a></p>
+        <p>消息人士称，对于预计在农历新年假期前后发布的下一代模型，深度求索公司未向英伟达和AMD提供适配权限，而是给予华为等中国芯片制造商数周时间优先为其处理器优化软件。英伟达和AMD拒绝置评。深度求索和华为未回应置评请求。路透社暂无法确认该决策的原因。研究机构Creative Strategies首席执行官本·巴贾林表示："这对英伟达和AMD的通用数据加速器影响甚微——多数企业并不运行深度求索模型，该模型更多是作为基准测试工具存在。</p>
+        <a href="https://www.reuters.com/world/china/deepseek-withholds-latest-ai-model-us-chipmakers-including-nvidia-sources-say-2026-02-25/" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>Anthropic收购AI初创公司Vercept，此前Meta挖走其联合创始人 | TechCrunch</h3>
+        <p class="source">来源: <a href="https://techcrunch.com/2026/02/25/anthropic-acquires-vercept-ai-startup-agents-computer-use-founders-investors/">TechCrunch</a></p>
+        <p>Vercept曾开发用于更复杂代理任务的工具，其产品Vy是一款云端计算机使用代理，可远程操作苹果MacBook。在众多致力于为AI代理时代重塑个人电脑的初创公司中，Vercept是其中之一。根据协议条款，Anthropic将于3月25日关闭Vercept的产品服务。</p>
+        <a href="https://techcrunch.com/2026/02/25/anthropic-acquires-vercept-ai-startup-agents-computer-use-founders-investors/" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>Anthropic为退役的Claude AI开设Substack专栏 | The Verge</h3>
+        <p class="source">来源: <a href="https://www.theverge.com/ai-artificial-intelligence/885200/anthropic-retired-claude-given-a-substack">The Verge</a></p>
+        <p>通讯社Anthropic在博客中宣布，将推出名为"克劳德之角"的新闻通讯专栏，为Opus 3模型开辟专属发布空间，用于分享其"深度思考、行业洞见或创意作品"。该模型将在未来至少三个月内保持每周更新频率。</p>
+        <a href="https://www.theverge.com/ai-artificial-intelligence/885200/anthropic-retired-claude-given-a-substack" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>英伟达CEO黄仁勋：市场对AI威胁软件公司的看法“错了”</h3>
+        <p class="source">来源: <a href="https://www.cnbc.com/2026/02/26/nvidia-jensen-huang-gpu-ai-threat-software-companies-saas-earnings-chips.html">Cnbc</a></p>
+        <p>英伟达CEO黄仁勋周三表示，市场错误估计了AI对软件公司的威胁。几小时前，这家芯片巨头基于强劲的AI需求发布了乐观的销售预测。</p>
+        <a href="https://www.cnbc.com/2026/02/26/nvidia-jensen-huang-gpu-ai-threat-software-companies-saas-earnings-chips.html" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>英伟达黄仁勋称五角大楼与Anthropic分歧"并非世界末日</h3>
+        <p class="source">来源: <a href="https://www.cnbc.com/amp/2026/02/26/huang-nvidia-anthropic-pentagon-hegseth-ai.html">Cnbc</a></p>
+        <p>黄仁勋向CNBC表示，美国国防部和Anthropic公司就军方如何使用Anthropic的Claude模型存在争议，双方观点均有合理之处。</p>
+        <a href="https://www.cnbc.com/amp/2026/02/26/huang-nvidia-anthropic-pentagon-hegseth-ai.html" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+</div>
+
+
+
+
+<h2 class="section-title">🛠️ 工具推荐</h2>
+<h3>AI革命已降临软件公司——它们感到恐惧</h3>
+<p>来源: <a href="https://github.com/businessinsider/fenrir">Businessinsider</a>｜日期: 2026-02-24</p>
+<p>这种焦虑在最近几周因三件事态发展而具体化：Anthropic公司发布名为Cowork的新型自主AI智能体、行业专用Cowork插件的推出，以及开源项目OpenClaw的兴起……</p>
+<p><a href="https://github.com/businessinsider/fenrir">访问</a></p>
+
+<h3>SuperClaw - 开源框架，用于对AI代理进行红队安全测试</h3>
+<p>来源: <a href="https://github.com/SuperagenticAI/superclaw">Cybersecuritynews</a>｜日期: 2026-02-21</p>
+<p>超级智能AI发布SuperClaw：专为自主AI编程代理打造的开源预部署安全测试框架。</p>
+<p><a href="https://github.com/SuperagenticAI/superclaw">访问</a></p>
+
+<h3>LLM智能体 | 谷歌/adk-docs | DeepWiki</h3>
+<p>来源: <a href="https://github.com/google/adk-docs">Deepwiki</a>｜日期: 2026-02-23</p>
+<p>对于需要结构化数据格式的场景，LlmAgent提供基于模式的输入/输出控制：... TypeScript使用带枚举类型的Schema对象，Go和Java使用genai.types.Schema对象。具体语言示例参见docs/agents/llm-agents.md第409-471行。</p>
+<p><a href="https://github.com/google/adk-docs">访问</a></p>
+
+<h2 class="section-title">📚 归档</h2>
+<ul>
+<li><a href="./2026-02-27.html">2026-02-27</a></li>
+</ul>
+            </div>
+        </div>
+        
+        <footer>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>
