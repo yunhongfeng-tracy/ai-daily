@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Daily · 2026-03-02</title>
+    
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0ebe4;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+.logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.logo h1 {
+    font-size: 2rem;
+    color: #2c4a5a;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+.logo h1 span { color: #d4893a; }
+.logo p { color: #6b7f8a; font-size: 1rem; }
+
+/* 归档列表 */
+.archive-list {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
+    overflow: hidden;
+}
+.archive-item {
+    display: flex;
+    align-items: center;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #e8e2d8;
+    transition: all 0.2s ease;
+}
+.archive-item:last-child { border-bottom: none; }
+.archive-item:hover { background: #faf7f2; }
+.archive-date {
+    font-size: 0.8rem;
+    color: #6b7f8a;
+    min-width: 90px;
+}
+.archive-title {
+    flex: 1;
+    font-size: 1rem;
+    color: #2c4a5a;
+    font-weight: 500;
+}
+.archive-arrow {
+    color: #d4893a;
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+.archive-item:hover .archive-arrow { transform: translateX(3px); }
+footer {
+    text-align: center;
+    margin-top: 40px;
+    color: #6b7f8a;
+    font-size: 0.85rem;
+}
+footer a { color: #d4893a !important; }
+
+/* 当日页面样式 */
+.day-page {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 4px 30px rgba(44,74,90,0.08);
+    overflow: hidden;
+    max-width: 100%;
+    margin: 0 auto;
+}
+.day-header {
+    background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%);
+    padding: 40px;
+    color: white;
+    position: relative;
+}
+.day-header::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(212,137,58,0.15);
+}
+.day-header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    position: relative;
+}
+.day-header .date {
+    opacity: 0.75;
+    font-size: 1rem;
+    position: relative;
+}
+.day-content { padding: 32px 40px; }
+
+/* 新闻网格布局 */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+@media (max-width: 768px) {
+    .news-grid { grid-template-columns: 1fr; }
+}
+.section-title {
+    font-size: 1.4rem;
+    color: #2c4a5a;
+    margin: 40px 0 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #d4893a;
+    display: inline-block;
+}
+
+/* 新闻卡片 */
+.card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 0;
+    border: 1px solid #e8e2d8;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.card:hover {
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
+}
+.card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.card h3 {
+    font-size: 1.1rem;
+    color: #2c4a5a;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    line-height: 1.4;
+}
+.card .source {
+    font-size: 0.8rem;
+    color: #6b7f8a;
+    margin-bottom: 12px;
+}
+.card .source a {
+    color: #d4893a;
+    text-decoration: none;
+    font-weight: 500;
+}
+.card .source a:hover { text-decoration: underline; }
+.card p {
+    font-size: 0.95rem;
+    color: #4a5e6a;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    flex: 1;
+}
+.card .read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: #3d5a6e;
+    text-decoration: none;
+    font-weight: 600;
+    margin-top: auto;
+    transition: color 0.2s, gap 0.2s;
+}
+.card .read-more:hover { color: #d4893a; gap: 10px; }
+
+/* 工具卡片网格 */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+@media (max-width: 600px) {
+    .tools-grid { grid-template-columns: 1fr; }
+}
+.tool-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e8e2d8;
+    transition: all 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+.tool-card:hover {
+    box-shadow: 0 8px 32px rgba(44,74,90,0.12);
+    transform: translateY(-3px);
+    border-color: #d4893a;
+}
+.tool-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.tool-icon.purple { background: linear-gradient(135deg, #3d5a6e 0%, #2c4a5a 100%); }
+.tool-icon.blue { background: linear-gradient(135deg, #4a7c8a 0%, #3d5a6e 100%); }
+.tool-icon.green { background: linear-gradient(135deg, #5a9a6e 0%, #3d7a58 100%); }
+.tool-icon.orange { background: linear-gradient(135deg, #d4893a 0%, #b86e2a 100%); }
+.tool-icon.pink { background: linear-gradient(135deg, #c45a6e 0%, #a84055 100%); }
+.tool-icon.teal { background: linear-gradient(135deg, #4a8a9a 0%, #3d6e7a 100%); }
+.tool-info { flex: 1; min-width: 0; }
+.tool-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2c4a5a;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+.tool-desc {
+    font-size: 0.85rem;
+    color: #6b7f8a;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.tool-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    color: #d4893a;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1.5px solid #d4893a;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: auto;
+    transition: all 0.2s;
+}
+.tool-link:hover {
+    background: #d4893a;
+    color: white;
+}
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 24px;
+    color: #3d5a6e;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.back-link:hover { color: #d4893a; }
+</style>
+
+</head>
+<body>
+    <div class="container">
+        <a href="../index.html" class="back-link">← 返回首页</a>
+        
+        <div class="day-page">
+            <div class="day-header">
+                <h1>AI Daily · 2026-03-02</h1>
+                <p class="date">2026年03月02日 08:30</p>
+            </div>
+            <div class="day-content">
+                
+
+<h2 class="section-title">📰 今日新闻</h2>
+<div class="news-grid">
+<div class="card">
+    <div class="card-content">
+        <h3>OpenAI看到了什么而Anthropic没看到</h3>
+        <p class="source">来源: <a href="https://www.theinformation.com/newsletters/the-briefing/openai-saw-anthropic">Theinformation</a></p>
+        <p>在我们关注本周预定活动——巴塞罗那世界移动通信大会（主角是SpaceX）以及苹果公司产品发布预热大师课——之前，我们应当注意到：关于人工智能的讨论已从平淡无奇的资金投入担忧，转向了更为深刻的层面。</p>
+        <a href="https://www.theinformation.com/newsletters/the-briefing/openai-saw-anthropic" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>Semafor Technology</h3>
+        <p class="source">来源: <a href="https://www.semafor.com/vertical/tech">Semafor</a></p>
+        <p>Anthropic此前政策规定，若AI达到特定阈值，公司将暂停训练直至确认其安全性。</p>
+        <a href="https://www.semafor.com/vertical/tech" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-content">
+        <h3>五角大楼：OpenAI入局，Anthropic出局——《纽约时报》</h3>
+        <p class="source">来源: <a href="https://www.nytimes.com/2026/02/28/podcasts/hardfork-pentagon-anthropic-openai.html">Nytimes</a></p>
+        <p>周五，特朗普总统下令联邦机构停止使用Anthropic的人工智能。</p>
+        <a href="https://www.nytimes.com/2026/02/28/podcasts/hardfork-pentagon-anthropic-openai.html" class="read-more" target="_blank">阅读原文 →</a>
+    </div>
+</div>
+</div>
+
+
+<h2 class="section-title">🛠️ 工具推荐</h2>
+<h3>构建AI代理变得简单：Agentic框架正式发布 | Jean Silva</h3>
+<p>来源: <a href="https://github.com/jeancsil/agentic-framework.git">Jeancsil</a>｜日期: 2026-02-23</p>
+<p>正是在那时，我开始构建最终成为Agentic框架的项目——这是一个Python框架，它让构建AI智能体不再像配置分布式系统，而更像是编写Python代码。</p>
+<p><a href="https://github.com/jeancsil/agentic-framework.git">访问</a></p>
+
+<h2 class="section-title">📚 归档</h2>
+<ul>
+<li><a href="./2026-03-02.html">2026-03-02</a></li>
+</ul>
+            </div>
+        </div>
+        
+        <footer>
+            Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
+        </footer>
+    </div>
+</body>
+</html>

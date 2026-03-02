@@ -43,6 +43,7 @@
     "https://github.com/google/adk-docs",
     "https://github.com/jpanther/congo",
     "https://github.com/zai-org/Open-AutoGLM",
-    "https://github.com/mozilla-ai/langchain-any-llm"
+    "https://github.com/mozilla-ai/langchain-any-llm",
+    "https://github.com/jeancsil/agentic-framework.git"
   ]
 }
