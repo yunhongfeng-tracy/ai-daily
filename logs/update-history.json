@@ -1,5 +1,14 @@
 [
   {
+    "run_id": "20260307T133913+0800",
+    "trigger": "manual",
+    "status": "success",
+    "started_at": "2026-03-07T13:39:13+08:00",
+    "finished_at": "2026-03-07T13:39:51+08:00",
+    "summary": "生成 AI Daily (2026-03-07)",
+    "details": "日报与首页已刷新；可在 ai-daily/logs/update-history.md 查看记录"
+  },
+  {
     "run_id": "20260307T130001+0800",
     "trigger": "cron",
     "status": "success",
