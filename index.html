@@ -35,6 +35,36 @@ body {
     box-shadow: 0 4px 20px rgba(44,74,90,0.08);
     overflow: hidden;
 }
+.update-log {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
+    margin-top: 18px;
+    overflow: hidden;
+}
+.update-log h2 {
+    font-size: 1rem;
+    color: #2c4a5a;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8e2d8;
+}
+.update-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f2eee7;
+    font-size: 0.9rem;
+    color: #4a5e6a;
+}
+.update-item:last-child { border-bottom: none; }
+.update-item .time { color: #6b7f8a; margin-right: 8px; }
+.update-item .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    margin-right: 8px;
+    background: #eef3f6;
+    color: #3d5a6e;
+}
 .archive-item {
     display: flex;
     align-items: center;
@@ -452,12 +482,19 @@ footer a { color: #d4893a !important; }
     <div class="archive-title">AI Daily · 2026-03-02</div>
     <span class="archive-arrow">→</span>
 </a>
+<a href="./daily/2026-03-07.html" class="archive-item">
+    <div class="archive-date">2026年03月07日 10:55</div>
+    <div class="archive-title">AI Daily · 2026-03-07</div>
+    <span class="archive-arrow">→</span>
+</a>
 <a href="./daily/2026-2-2.html" class="archive-item">
     <div class="archive-date">2026年02月02日 14:10</div>
     <div class="archive-title">AI Daily · 2026-2-2（测试）</div>
     <span class="archive-arrow">→</span>
 </a>
         </div>
+
+        <div class="update-log"><h2>📝 更新日志</h2><div class="update-item">暂无更新记录</div></div>
         
         <footer>
             Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>

@@ -5,6 +5,7 @@ AI Daily - 简单美观的首页 + 每日归档生成器
 
 import os
 import re
+import json
 from datetime import datetime
 from markdown import Markdown
 import html
@@ -39,6 +40,36 @@ body {
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(44,74,90,0.08);
     overflow: hidden;
+}
+.update-log {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
+    margin-top: 18px;
+    overflow: hidden;
+}
+.update-log h2 {
+    font-size: 1rem;
+    color: #2c4a5a;
+    padding: 14px 20px;
+    border-bottom: 1px solid #e8e2d8;
+}
+.update-item {
+    padding: 12px 20px;
+    border-bottom: 1px solid #f2eee7;
+    font-size: 0.9rem;
+    color: #4a5e6a;
+}
+.update-item:last-child { border-bottom: none; }
+.update-item .time { color: #6b7f8a; margin-right: 8px; }
+.update-item .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    margin-right: 8px;
+    background: #eef3f6;
+    color: #3d5a6e;
 }
 .archive-item {
     display: flex;
@@ -319,6 +350,38 @@ def convert_markdown(content):
     html_content = md.convert(content)
     return html_content
 
+
+def get_update_history(limit=8):
+    path = os.path.join('logs', 'update-history.json')
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data[:limit] if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def render_update_log_html():
+    history = get_update_history(8)
+    if not history:
+        return '<div class="update-log"><h2>📝 更新日志</h2><div class="update-item">暂无更新记录</div></div>'
+
+    rows = []
+    for item in history:
+        when = item.get('finished_at', '').replace('T', ' ')[:16]
+        trigger = item.get('trigger', 'cron')
+        status = item.get('status', 'unknown')
+        summary = html.escape(item.get('summary', ''))
+        emoji = '✅' if status == 'success' else '❌'
+        rows.append(
+            f'<div class="update-item"><span class="time">{when}</span><span class="tag">{trigger}</span>{emoji} {summary}</div>'
+        )
+
+    return '<div class="update-log"><h2>📝 更新日志</h2>' + ''.join(rows) + '</div>'
+
+
 def generate_index_html():
     """生成首页"""
     files = get_daily_files()
@@ -348,6 +411,8 @@ def generate_index_html():
     <span class="archive-arrow">→</span>
 </a>'''
     
+    update_log_html = render_update_log_html()
+
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -367,6 +432,8 @@ def generate_index_html():
         <div class="archive-list">
             {items_html if items_html else '<div class="archive-item"><div class="archive-title" style="padding:20px;color:#666;">暂无日报内容</div></div>'}
         </div>
+
+        {update_log_html}
         
         <footer>
             Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
