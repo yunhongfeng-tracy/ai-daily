@@ -31,6 +31,7 @@ finish_log() {
   UPDATE_FINISHED_AT="$finished_at" \
   UPDATE_SUMMARY="$SUMMARY" \
   UPDATE_DETAILS="$DETAILS" \
+  SYSTEM_LOG_FILE="$LOG_FILE" \
   python3 "$REPO_DIR/update_log.py" >> "$LOG_FILE" 2>&1 || true
 
   # 更新首页里的“更新日志”模块
