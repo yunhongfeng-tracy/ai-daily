@@ -14,6 +14,8 @@ HISTORY_MD = os.path.join(LOG_DIR, "update-history.md")
 STATE_JSON = os.path.join(LOG_DIR, "update-state.json")
 SYSTEM_HISTORY_JSON = os.path.join(LOG_DIR, "system-log-history.json")
 SYSTEM_HISTORY_MD = os.path.join(LOG_DIR, "system-log-history.md")
+DOC_HISTORY_JSON = os.path.join(LOG_DIR, "doc-update-history.json")
+DOC_HISTORY_MD = os.path.join(LOG_DIR, "doc-update-history.md")
 
 
 def _load_json(path, default):
@@ -40,9 +42,27 @@ def main():
     summary = os.environ.get("UPDATE_SUMMARY", "生成 AI Daily 页面")
     details = os.environ.get("UPDATE_DETAILS", "")
     system_log_file = os.environ.get("SYSTEM_LOG_FILE", "/tmp/ai-daily-cron.log")
+    doc_update_items_raw = os.environ.get("DOC_UPDATE_ITEMS", "[]")
 
     if not run_id:
         run_id = datetime.now().astimezone().strftime("%Y%m%dT%H%M%S%z")
+
+    try:
+        parsed_doc_items = json.loads(doc_update_items_raw)
+    except Exception:
+        parsed_doc_items = []
+    if not isinstance(parsed_doc_items, list):
+        parsed_doc_items = []
+
+    doc_items = []
+    for entry in parsed_doc_items[:20]:
+        if not isinstance(entry, dict):
+            continue
+        path = str(entry.get("path", "")).strip()
+        summary_text = str(entry.get("summary", "")).strip()
+        if not path:
+            continue
+        doc_items.append({"path": path, "summary": summary_text})
 
     history = _load_json(HISTORY_JSON, [])
     item = {
@@ -107,6 +127,41 @@ def main():
 
     with open(SYSTEM_HISTORY_MD, "w", encoding="utf-8") as f:
         f.write("\n".join(sys_lines) + "\n")
+
+    # 文档更新记录（核心：记录更新了哪些文档 + 大概内容）
+    doc_history = _load_json(DOC_HISTORY_JSON, [])
+    doc_history_item = {
+        "run_id": run_id,
+        "trigger": trigger,
+        "status": status,
+        "finished_at": finished_at,
+        "doc_count": len(doc_items),
+        "docs": doc_items,
+    }
+    doc_history.insert(0, doc_history_item)
+    doc_history = doc_history[:200]
+    _save_json(DOC_HISTORY_JSON, doc_history)
+
+    doc_lines = ["# AI Daily 文档更新记录", "", "| 时间 | 触发方式 | 状态 | 更新文档 |", "|---|---|---|---|"]
+    for x in doc_history[:50]:
+        emoji = "✅" if x.get("status") == "success" else "❌"
+        docs = x.get("docs") if isinstance(x.get("docs"), list) else []
+        if docs:
+            parts = []
+            for d in docs[:8]:
+                path = str(d.get("path", "")).strip()
+                summary_text = str(d.get("summary", "")).strip()
+                if path and summary_text:
+                    parts.append(f"{path}：{summary_text}")
+                elif path:
+                    parts.append(path)
+            docs_text = "<br>".join(parts) if parts else "-"
+        else:
+            docs_text = "-"
+        doc_lines.append(f"| {x.get('finished_at','')} | {x.get('trigger','')} | {emoji} {x.get('status','')} | {docs_text} |")
+
+    with open(DOC_HISTORY_MD, "w", encoding="utf-8") as f:
+        f.write("\n".join(doc_lines) + "\n")
 
 
 if __name__ == "__main__":

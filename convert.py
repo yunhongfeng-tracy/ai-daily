@@ -55,8 +55,16 @@ body {
     margin-top: 18px;
     overflow: hidden;
 }
+.doc-log {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(44,74,90,0.08);
+    margin-top: 18px;
+    overflow: hidden;
+}
 .update-log h2,
-.system-log h2 {
+.system-log h2,
+.doc-log h2 {
     font-size: 1rem;
     color: #2c4a5a;
     padding: 14px 20px;
@@ -383,6 +391,18 @@ def get_system_log_history(limit=8):
         return []
 
 
+def get_doc_update_history(limit=8):
+    path = os.path.join('logs', 'doc-update-history.json')
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data[:limit] if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
 def render_update_log_html():
     history = get_update_history(8)
     if not history:
@@ -423,6 +443,39 @@ def render_system_log_html():
     return '<div class="system-log"><h2>🖥️ 系统日志更新</h2>' + ''.join(rows) + '</div>'
 
 
+def render_doc_update_html():
+    history = get_doc_update_history(8)
+    if not history:
+        return '<div class="doc-log"><h2>📄 文档更新记录</h2><div class="update-item">暂无文档更新记录</div></div>'
+
+    rows = []
+    for item in history:
+        when = item.get('finished_at', '').replace('T', ' ')[:16]
+        trigger = item.get('trigger', 'cron')
+        status = item.get('status', 'unknown')
+        emoji = '✅' if status == 'success' else '❌'
+        docs = item.get('docs') if isinstance(item.get('docs'), list) else []
+
+        if docs:
+            details = []
+            for d in docs[:5]:
+                path = html.escape(str(d.get('path', '')))
+                summary = html.escape(str(d.get('summary', '')))
+                if path and summary:
+                    details.append(f'<li><b>{path}</b>：{summary}</li>')
+                elif path:
+                    details.append(f'<li><b>{path}</b></li>')
+            detail_html = '<ul style="margin:6px 0 0 18px;line-height:1.5;">' + ''.join(details) + '</ul>'
+        else:
+            detail_html = '<div style="font-size:0.85rem;color:#7a8b96;margin-top:4px;">本次未记录到文档更新项</div>'
+
+        rows.append(
+            f'<div class="update-item"><span class="time">{when}</span><span class="tag">{trigger}</span>{emoji} 文档更新{detail_html}</div>'
+        )
+
+    return '<div class="doc-log"><h2>📄 文档更新记录</h2>' + ''.join(rows) + '</div>'
+
+
 def generate_index_html():
     """生成首页"""
     files = get_daily_files()
@@ -454,6 +507,7 @@ def generate_index_html():
     
     update_log_html = render_update_log_html()
     system_log_html = render_system_log_html()
+    doc_update_html = render_doc_update_html()
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -477,6 +531,7 @@ def generate_index_html():
 
         {update_log_html}
         {system_log_html}
+        {doc_update_html}
         
         <footer>
             Powered by OpenClaw | <a href="https://github.com/yunhongfeng-tracy/ai-daily">GitHub</a>
