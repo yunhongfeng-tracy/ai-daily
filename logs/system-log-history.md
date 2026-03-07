@@ -2,4 +2,5 @@
 
 | 时间 | 触发方式 | 状态 | 日志文件 | 大小 |
 |---|---|---|---|---|
+| 2026-03-07T13:59:13+08:00 | manual | ✅ success | /tmp/ai-daily-cron.log | 32.9 KB |
 | 2026-03-07T13:39:51+08:00 | manual | ✅ success | /tmp/ai-daily-cron.log | 30.8 KB |

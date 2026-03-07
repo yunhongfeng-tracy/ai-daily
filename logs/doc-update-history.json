@@ -1,0 +1,27 @@
+[
+  {
+    "run_id": "20260307T135829+0800",
+    "trigger": "manual",
+    "status": "success",
+    "finished_at": "2026-03-07T13:59:13+08:00",
+    "doc_count": 4,
+    "docs": [
+      {
+        "path": "daily/2026-03-07.md",
+        "summary": "AI Daily · 2026-03-07；来源: [Bloomberg](https://www.bloomberg.com/news/articles/2026-03-05/us-drafts-rul"
+      },
+      {
+        "path": "daily/2026-03-07.html",
+        "summary": "当日日报页面已重新生成"
+      },
+      {
+        "path": "index.html",
+        "summary": "首页归档与日志模块已刷新"
+      },
+      {
+        "path": "README.md",
+        "summary": "归档索引已包含 2026-03-07 条目"
+      }
+    ]
+  }
+]

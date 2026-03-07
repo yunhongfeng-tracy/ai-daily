@@ -1,5 +1,14 @@
 [
   {
+    "run_id": "20260307T135829+0800",
+    "trigger": "manual",
+    "status": "success",
+    "finished_at": "2026-03-07T13:59:13+08:00",
+    "log_file": "/tmp/ai-daily-cron.log",
+    "log_size_bytes": 33653,
+    "summary": "系统日志已更新（ai-daily-cron.log）"
+  },
+  {
     "run_id": "20260307T133913+0800",
     "trigger": "manual",
     "status": "success",
