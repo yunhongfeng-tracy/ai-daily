@@ -33,6 +33,10 @@ finish_log() {
   UPDATE_DETAILS="$DETAILS" \
   python3 "$REPO_DIR/update_log.py" >> "$LOG_FILE" 2>&1 || true
 
+  # 更新首页里的“更新日志”模块
+  cd "$REPO_DIR"
+  python3 convert.py >> "$LOG_FILE" 2>&1 || true
+
   {
     echo "状态: $STATUS"
     [ -n "$DETAILS" ] && echo "详情: $DETAILS"
